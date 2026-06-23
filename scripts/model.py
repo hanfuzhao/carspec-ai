@@ -78,7 +78,7 @@ class ClassicalModel:
     def _build(self):
         if self.model_type == "rf":
             return RandomForestClassifier(
-                n_estimators=100, max_depth=20, random_state=SEED, n_jobs=-1, class_weight="balanced"
+                n_estimators=20, max_depth=10, random_state=SEED, n_jobs=-1, class_weight="balanced"
             )
         svc = LinearSVC(C=1.0, random_state=SEED, class_weight="balanced", max_iter=2000)
         return CalibratedClassifierCV(svc, cv=3)
