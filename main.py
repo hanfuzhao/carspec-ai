@@ -32,7 +32,7 @@ def load_models():
             MODELS[f"classical_{task}"] = model
             print(f"  classical_{task} 已加载")
     # Deep 模型
-    deep_path = MODELS_DIR / "deep_multitask.h5"
+    deep_path = MODELS_DIR / "deep_multitask.pt"
     if deep_path.exists():
         try:
             deep_model = DeepMultiTaskModel()
@@ -81,7 +81,7 @@ def predict_with_deep(img_array):
     model = MODELS["deep"]
     X = np.expand_dims(img_array, axis=0)
     try:
-        preds = model.predict(X)
+        preds = model.predict_proba(X)
         results = {}
         task_classes = {"car_type": CAR_TYPES, "door_count": DOOR_COUNTS, "seat_count": SEAT_COUNTS}
         for task, classes in task_classes.items():
