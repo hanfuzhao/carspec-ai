@@ -1,3 +1,13 @@
+---
+title: CarSpec AI
+emoji: 🚗
+colorFrom: blue
+colorTo: yellow
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # CarSpec AI — 车辆多属性智能识别系统
 
 > Module 2 Project · Computer Vision · 基于 CompCars 数据集
@@ -8,14 +18,19 @@ CarSpec AI 是一个基于计算机视觉的车辆多属性识别系统。上传
 
 ## 核心创新
 
-1. **多任务联合学习**：ResNet50 共享 backbone + 三个分类头，利用任务间相关性提升性能
+1. **多任务联合学习**：MobileNetV2 共享 backbone + 三个分类头，利用任务间相关性提升性能
 2. **可解释视觉特征**：提取 50+ 手工特征（颜色直方图、HOG、纹理、车身比例、对称性），提供比纯 CNN 更好的可解释性
-3. **三模型对比**：Naive 基线 / Classical ML（随机森林）/ Deep Learning（ResNet50 多任务）
+3. **三模型对比**：Naive 基线 / Classical ML（随机森林）/ Deep Learning（MobileNetV2 多任务）
+
+## 在线 Demo
+
+访问 HuggingFace Space: https://hanfuzhao781-carspec-ai.hf.space
 
 ## 项目结构
 
 ```
 ├── README.md
+├── REPORT.md               <- 完整项目报告
 ├── requirements.txt
 ├── Makefile
 ├── setup.py                <- 训练管线
@@ -24,6 +39,7 @@ CarSpec AI 是一个基于计算机视觉的车辆多属性识别系统。上传
 ├── scripts/
 │   ├── data.py             <- 数据加载
 │   ├── make_dataset.py     <- 数据下载
+│   ├── synthetic_data.py   <- 合成数据生成
 │   ├── features.py         <- 可解释特征提取
 │   ├── model.py            <- 三个模型实现
 │   └── experiment.py       <- 实验框架
@@ -34,33 +50,8 @@ CarSpec AI 是一个基于计算机视觉的车辆多属性识别系统。上传
 │   └── outputs/            <- 输出结果
 ├── static/                 <- 前端资源
 ├── templates/              <- HTML 模板
-├── notebooks/              <- 探索性分析
 └── .github/                <- CI/PR 模板
 ```
-
-## 快速开始
-
-### 1. 安装依赖
-```bash
-pip install -r requirements.txt
-```
-
-### 2. 下载数据
-```bash
-python -m scripts.make_dataset
-```
-按提示从 http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/ 下载数据，解压到 `data/raw/compcars/`。
-
-### 3. 训练模型
-```bash
-python setup.py
-```
-
-### 4. 启动应用
-```bash
-python main.py
-```
-访问 http://localhost:7860
 
 ## 三个模型位置
 
@@ -68,7 +59,7 @@ python main.py
 |------|---------|-----------|
 | Naive 基线 | `scripts/model.py` → `NaiveBaseline` 类 | `models/naive_*.pkl` |
 | Classical ML | `scripts/model.py` → `ClassicalModel` 类 | `models/classical_*.pkl` |
-| Deep Learning | `scripts/model.py` → `DeepMultiTaskModel` 类 | `models/deep_multitask.h5` |
+| Deep Learning | `scripts/model.py` → `DeepMultiTaskModel` 类 | `models/deep_multitask.pt` |
 
 ## 数据集
 
@@ -77,15 +68,10 @@ python main.py
 - 官网: http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/
 - 论文: Yang et al., "A Large-Scale Car Dataset for Fine-Grained Categorization and Verification"
 
-## 部署
-
-应用部署在 HuggingFace Spaces（Docker SDK）：
-- 在线 Demo: [部署后填写 URL]
-
 ## 技术栈
 
-- **深度学习**: TensorFlow/Keras, ResNet50
+- **深度学习**: PyTorch, torchvision MobileNetV2
 - **经典 ML**: scikit-learn, 随机森林
-- **特征工程**: scikit-image (HOG), OpenCV-style 特征
+- **特征工程**: scikit-image (HOG), LBP 纹理
 - **Web 框架**: Flask
 - **部署**: Docker, HuggingFace Spaces
