@@ -210,9 +210,9 @@ def image_generator(df: pd.DataFrame, batch_size=32, size=IMG_SIZE, shuffle=True
                 row = df.iloc[idx]
                 img = load_image(row["img_path"], size)
                 batch_imgs.append(img)
-                batch_car_type.append(TYPE2ID[row["car_type"]])
-                batch_door.append(DOOR2ID[row["door_count"]])
-                batch_seat.append(SEAT2ID[row["seat_count"]])
+                batch_car_type.append(TYPE2ID[str(row["car_type"])])
+                batch_door.append(DOOR2ID[str(row["door_count"])])
+                batch_seat.append(SEAT2ID[str(row["seat_count"])])
             yield (
                 np.array(batch_imgs),
                 {

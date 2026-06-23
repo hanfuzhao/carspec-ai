@@ -5,6 +5,8 @@
 - predict(X) 预测类别
 - predict_proba(X) 预测概率
 - save(path) / load(path) 持久化
+
+Deep 模型使用 PyTorch + torchvision ResNet50.
 """
 import os
 import json
@@ -16,7 +18,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 
 MODELS_DIR = Path("models")
 SEED = 42
@@ -39,10 +40,12 @@ class NaiveBaseline:
         return self
 
     def predict(self, X):
-        return self.model.predict(np.zeros((len(X), 1)))
+        n = len(X) if hasattr(X, "__len__") else 1
+        return self.model.predict(np.zeros((n, 1)))
 
     def predict_proba(self, X):
-        return self.model.predict_proba(np.zeros((len(X), 1)))
+        n = len(X) if hasattr(X, "__len__") else 1
+        return self.model.predict_proba(np.zeros((n, 1)))
 
     def save(self, path):
         path = Path(path)
@@ -77,7 +80,6 @@ class ClassicalModel:
             return RandomForestClassifier(
                 n_estimators=100, max_depth=20, random_state=SEED, n_jobs=-1, class_weight="balanced"
             )
-        # LinearSVC + 概率校准
         svc = LinearSVC(C=1.0, random_state=SEED, class_weight="balanced", max_iter=2000)
         return CalibratedClassifierCV(svc, cv=3)
 
@@ -95,7 +97,6 @@ class ClassicalModel:
         return self.model.predict_proba(self.scaler.transform(X))
 
     def feature_importance(self):
-        """返回特征重要性（仅RF支持）."""
         if self.model_type != "rf" or not hasattr(self.model, "feature_importances_"):
             return None
         return self.model.feature_importances_
@@ -121,10 +122,10 @@ class ClassicalModel:
 
 
 # ============================================================
-# 3. Deep Learning 多任务模型
+# 3. Deep Learning 多任务模型 (PyTorch)
 # ============================================================
 class DeepMultiTaskModel:
-    """ResNet50迁移学习 + 多任务分类头.
+    """ResNet50迁移学习 + 多任务分类头 (PyTorch).
 
     共享 backbone，三个分类头分别预测：
     - car_type (5类)
@@ -132,10 +133,11 @@ class DeepMultiTaskModel:
     - seat_count (3类)
     """
 
-    def __init__(self, backbone="resnet50", use_aux_features=False, aux_dim=50):
+    def __init__(self, backbone="resnet50", use_aux_features=False, aux_dim=50, device=None):
         self.backbone_name = backbone
         self.use_aux_features = use_aux_features
         self.aux_dim = aux_dim
+        self.device = device or ("cuda" if _torch_available() and _torch_cuda() else "cpu")
         self.model = None
         self.classes_ = {
             "car_type": ["sedan", "suv", "mpv", "coupe", "hatchback"],
@@ -144,85 +146,181 @@ class DeepMultiTaskModel:
         }
 
     def _build_model(self):
-        import tensorflow as tf
-        from tensorflow.keras import layers, Model, Input
+        import torch
+        import torch.nn as nn
+        from torchvision import models
 
-        # 输入
-        img_input = Input(shape=(224, 224, 3), name="image")
-        inputs = [img_input]
-        # ResNet50 backbone
-        if self.backbone_name == "resnet50":
-            base = tf.keras.applications.ResNet50(
-                include_top=False, weights="imagenet", input_tensor=img_input
-            )
-        else:
-            base = tf.keras.applications.MobileNetV2(
-                include_top=False, weights="imagenet", input_tensor=img_input, alpha=0.75
-            )
-        base.trainable = False  # 先冻结
-        x = layers.GlobalAveragePooling2D()(base.output)
-        # 可选：拼接辅助特征
-        if self.use_aux_features:
-            aux_input = Input(shape=(self.aux_dim,), name="aux_features")
-            inputs.append(aux_input)
-            x = layers.Concatenate()([x, aux_input])
-        x = layers.Dense(256, activation="relu")(x)
-        x = layers.Dropout(0.5)(x)
-        # 三个分类头
-        heads = {}
-        for task, n_classes in [("car_type", 5), ("door_count", 3), ("seat_count", 3)]:
-            heads[task] = layers.Dense(n_classes, activation="softmax", name=task)(x)
-        self.model = Model(inputs=inputs, outputs=heads)
-        self.model.compile(
-            optimizer=tf.keras.optimizers.Adam(1e-3),
-            loss={task: "sparse_categorical_crossentropy" for task in heads},
-            loss_weights={task: 1.0 for task in heads},
-            metrics={task: "accuracy" for task in heads},
-        )
+        class MultiTaskNet(nn.Module):
+            def __init__(self, backbone_name, use_aux, aux_dim):
+                super().__init__()
+                if backbone_name == "resnet50":
+                    base = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+                    feat_dim = base.fc.in_features
+                    base.fc = nn.Identity()
+                else:
+                    base = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
+                    feat_dim = base.classifier[1].in_features
+                    base.classifier = nn.Identity()
+                self.backbone = base
+                self.use_aux = use_aux
+                in_dim = feat_dim + (aux_dim if use_aux else 0)
+                self.shared = nn.Sequential(
+                    nn.Linear(in_dim, 256), nn.ReLU(), nn.Dropout(0.5)
+                )
+                self.head_car_type = nn.Linear(256, 5)
+                self.head_door = nn.Linear(256, 3)
+                self.head_seat = nn.Linear(256, 3)
+
+            def forward(self, x, aux=None):
+                feat = self.backbone(x)
+                if self.use_aux and aux is not None:
+                    feat = torch.cat([feat, aux], dim=1)
+                shared = self.shared(feat)
+                return {
+                    "car_type": self.head_car_type(shared),
+                    "door_count": self.head_door(shared),
+                    "seat_count": self.head_seat(shared),
+                }
+
+        self.model = MultiTaskNet(self.backbone_name, self.use_aux_features, self.aux_dim)
+        self.model.to(self.device)
 
     def fit(self, train_gen, val_gen, epochs=20, steps_per_epoch=None, validation_steps=None):
-        import tensorflow as tf
+        import torch
+        import torch.nn as nn
+        from torch.optim import Adam
         if self.model is None:
             self._build_model()
-        callbacks = [
-            tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-            tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3),
-            tf.keras.callbacks.ModelCheckpoint(
-                str(MODELS_DIR / "deep_best.h5"), save_best_only=True, save_weights_only=True
-            ),
-        ]
-        history = self.model.fit(
-            train_gen, validation_data=val_gen, epochs=epochs,
-            steps_per_epoch=steps_per_epoch, validation_steps=validation_steps,
-            callbacks=callbacks, verbose=1,
-        )
+        optimizer = Adam(self.model.parameters(), lr=1e-3)
+        criterion = nn.CrossEntropyLoss()
+        best_val_acc = 0.0
+        patience, patience_counter = 5, 0
+        history = {"train_loss": [], "val_acc": []}
+        for epoch in range(epochs):
+            self.model.train()
+            total_loss = 0
+            for step in range(steps_per_epoch or 100):
+                try:
+                    X, y = next(train_gen)
+                except StopIteration:
+                    break
+                X_t = torch.FloatTensor(X).permute(0, 3, 1, 2).to(self.device)
+                y_car = torch.LongTensor(y["car_type"]).to(self.device)
+                y_door = torch.LongTensor(y["door_count"]).to(self.device)
+                y_seat = torch.LongTensor(y["seat_count"]).to(self.device)
+                optimizer.zero_grad()
+                out = self.model(X_t)
+                loss = (criterion(out["car_type"], y_car) +
+                        criterion(out["door_count"], y_door) +
+                        criterion(out["seat_count"], y_seat))
+                loss.backward()
+                optimizer.step()
+                total_loss += loss.item()
+            avg_loss = total_loss / max(steps_per_epoch or 100, 1)
+            history["train_loss"].append(avg_loss)
+            # 验证
+            self.model.eval()
+            correct, total = 0, 0
+            with torch.no_grad():
+                for step in range(validation_steps or 20):
+                    try:
+                        X, y = next(val_gen)
+                    except StopIteration:
+                        break
+                    X_t = torch.FloatTensor(X).permute(0, 3, 1, 2).to(self.device)
+                    out = self.model(X_t)
+                    pred = out["car_type"].argmax(dim=1).cpu().numpy()
+                    correct += (pred == y["car_type"]).sum()
+                    total += len(pred)
+            val_acc = correct / max(total, 1)
+            history["val_acc"].append(float(val_acc))
+            print(f"  Epoch {epoch+1}/{epochs} - loss: {avg_loss:.4f} - val_acc: {val_acc:.4f}")
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                patience_counter = 0
+                self._save_weights(MODELS_DIR / "deep_best.pt")
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print(f"  Early stopping at epoch {epoch+1}")
+                    break
         return history
 
-    def predict(self, X, aux_features=None):
-        inputs = [X] if not self.use_aux_features else [X, aux_features]
-        preds = self.model.predict(inputs, verbose=0)
-        return {task: np.argmax(preds[task], axis=1) for task in preds}
-
-    def predict_proba(self, X, aux_features=None):
-        inputs = [X] if not self.use_aux_features else [X, aux_features]
-        return self.model.predict(inputs, verbose=0)
-
-    def save(self, path):
+    def _save_weights(self, path):
+        import torch
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        self.model.save(str(path))
+        torch.save(self.model.state_dict(), str(path))
+
+    def predict(self, X, aux_features=None):
+        import torch
+        if self.model is None:
+            self._build_model()
+        self.model.eval()
+        with torch.no_grad():
+            X_t = torch.FloatTensor(X).permute(0, 3, 1, 2).to(self.device)
+            out = self.model(X_t)
+        return {task: out[task].argmax(dim=1).cpu().numpy() for task in out}
+
+    def predict_proba(self, X, aux_features=None):
+        import torch
+        if self.model is None:
+            self._build_model()
+        self.model.eval()
+        with torch.no_grad():
+            X_t = torch.FloatTensor(X).permute(0, 3, 1, 2).to(self.device)
+            out = self.model(X_t)
+        result = {}
+        for task in out:
+            result[task] = torch.softmax(out[task], dim=1).cpu().numpy()
+        return result
+
+    def save(self, path):
+        import torch
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({
+            "state_dict": self.model.state_dict() if self.model else None,
+            "backbone": self.backbone_name,
+            "use_aux": self.use_aux_features,
+            "aux_dim": self.aux_dim,
+        }, str(path))
 
     def load(self, path):
-        import tensorflow as tf
-        self.model = tf.keras.models.load_model(str(path))
+        import torch
+        path = Path(path)
+        if not path.exists():
+            return None
+        checkpoint = torch.load(str(path), map_location=self.device, weights_only=False)
+        self.backbone_name = checkpoint.get("backbone", "resnet50")
+        self.use_aux_features = checkpoint.get("use_aux", False)
+        self.aux_dim = checkpoint.get("aux_dim", 50)
+        self._build_model()
+        if checkpoint.get("state_dict"):
+            self.model.load_state_dict(checkpoint["state_dict"])
         return self
+
+
+def _torch_available():
+    try:
+        import torch
+        return True
+    except ImportError:
+        return False
+
+
+def _torch_cuda():
+    try:
+        import torch
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
 
 
 # ============================================================
 # 工厂函数
 # ============================================================
 def get_model(model_name: str, task: str = "car_type", **kwargs):
-    """根据名称获取模型实例."""
     if model_name == "naive":
         return NaiveBaseline(task=task)
     if model_name == "classical":
@@ -233,15 +331,14 @@ def get_model(model_name: str, task: str = "car_type", **kwargs):
 
 
 def load_trained_model(model_name: str, task: str = "car_type"):
-    """加载已训练的模型."""
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    path = MODELS_DIR / f"{model_name}_{task}.pkl"
     if model_name == "deep":
-        path = MODELS_DIR / "deep_multitask.h5"
+        path = MODELS_DIR / "deep_multitask.pt"
         if not path.exists():
             return None
         model = DeepMultiTaskModel()
         return model.load(path)
+    path = MODELS_DIR / f"{model_name}_{task}.pkl"
     if not path.exists():
         return None
     model = get_model(model_name, task=task)
@@ -250,7 +347,6 @@ def load_trained_model(model_name: str, task: str = "car_type"):
 
 if __name__ == "__main__":
     print("可用模型: naive, classical, deep")
-    print("Naive 测试:")
     m = NaiveBaseline()
     m.fit(None, np.array(["sedan", "sedan", "suv"]))
     print(f"  classes: {m.classes_}")
