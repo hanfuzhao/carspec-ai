@@ -75,12 +75,11 @@ def step3_train_naive(train, val, test):
     print("=" * 60)
     results = {}
     for task, label2id in [("car_type", TYPE2ID), ("door_count", DOOR2ID), ("seat_count", SEAT2ID)]:
-        y_train = train[task].map(label2id).values
-        y_test = test[task].map(label2id).values
+        y_train = train[task].values
+        y_test = test[task].values
         model = NaiveBaseline(task=task)
         model.fit(None, y_train)
         y_pred = model.predict(None)
-        # 用测试集大小
         y_pred = np.full(len(y_test), y_pred[0])
         metrics = compute_metrics(y_test, y_pred)
         results[task] = metrics
@@ -100,8 +99,8 @@ def step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub):
         ("door_count", DOOR2ID, DOOR_COUNTS),
         ("seat_count", SEAT2ID, SEAT_COUNTS),
     ]:
-        y_train = train_sub[task].map(label2id).values
-        y_test = test_sub[task].map(label2id).values
+        y_train = train_sub[task].values
+        y_test = test_sub[task].values
         model = ClassicalModel(task=task, model_type="rf")
         model.fit(X_train, y_train)
         metrics = evaluate_model(model, X_test, y_test, task, classes, "classical")
@@ -114,7 +113,7 @@ def step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub):
 def step5_train_deep(train, val, test, epochs=20, batch_size=32, use_aux=False):
     """步骤5：训练Deep多任务模型."""
     print("\n" + "=" * 60)
-    print("步骤5: 训练 Deep 多任务模型 (ResNet50)")
+    print("步骤5: 训练 Deep 多任务模型 (MobileNetV2)")
     print("=" * 60)
     # 构建生成器
     def multi_task_gen(df, batch_size, shuffle=True):
@@ -124,14 +123,14 @@ def step5_train_deep(train, val, test, epochs=20, batch_size=32, use_aux=False):
             yield X, y
     train_gen = multi_task_gen(train, batch_size, shuffle=True)
     val_gen = multi_task_gen(val, batch_size, shuffle=False)
-    steps = min(len(train) // batch_size, 200)
-    val_steps = min(len(val) // batch_size, 50)
-    model = DeepMultiTaskModel(backbone="resnet50", use_aux_features=use_aux)
+    steps = min(len(train) // batch_size, 50)
+    val_steps = min(len(val) // batch_size, 10)
+    model = DeepMultiTaskModel(backbone="mobilenet", use_aux_features=use_aux)
     history = model.fit(
         train_gen, val_gen, epochs=epochs,
         steps_per_epoch=steps, validation_steps=val_steps,
     )
-    model.save(MODELS_DIR / "deep_multitask.h5")
+    model.save(MODELS_DIR / "deep_multitask.pt")
     print("Deep 模型已保存")
     return model, history
 
@@ -185,7 +184,7 @@ def main():
             print(f"Deep 模型训练失败: {e}")
             deep_results = {"status": "failed", "error": str(e)}
     # 步骤6
-    y_train_car_type = train_sub["car_type"].map(TYPE2ID).values
+    y_train_car_type = train_sub["car_type"].values
     exp_results = step6_experiment(
         X_train, y_train_car_type,
         lambda: ClassicalModel(task="car_type", model_type="rf"),
