@@ -1,0 +1,15 @@
+# Keep-alive workflow for HuggingFace Spaces
+name: Keep Alive
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每6小时
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Space
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            https://YOUR_SPACE_URL.hf.space/health || true
