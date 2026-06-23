@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-06-23T19:28:55.942895",
+  "models": {
+    "naive": {
+      "car_type": {
+        "accuracy": 0.23,
+        "precision": 0.0529,
+        "recall": 0.23,
+        "f1": 0.08601626016260162,
+        "n_samples": 600
+      },
+      "door_count": {
+        "accuracy": 0.38,
+        "precision": 0.1444,
+        "recall": 0.38,
+        "f1": 0.20927536231884059,
+        "n_samples": 600
+      },
+      "seat_count": {
+        "accuracy": 0.53,
+        "precision": 0.28090000000000004,
+        "recall": 0.53,
+        "f1": 0.36718954248366015,
+        "n_samples": 600
+      }
+    },
+    "classical": {
+      "car_type": {
+        "accuracy": 0.205,
+        "precision": 0.20321598552506648,
+        "recall": 0.205,
+        "f1": 0.20132326712177612,
+        "n_samples": 600
+      },
+      "door_count": {
+        "accuracy": 0.365,
+        "precision": 0.3514132688418403,
+        "recall": 0.365,
+        "f1": 0.35257626825684907,
+        "n_samples": 600
+      },
+      "seat_count": {
+        "accuracy": 0.5166666666666667,
+        "precision": 0.3810688405797102,
+        "recall": 0.5166666666666667,
+        "f1": 0.3992482962058793,
+        "n_samples": 600
+      }
+    },
+    "deep": {
+      "status": "trained"
+    },
+    "experiment_data_size": [
+      {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n_samples": 300,
+        "fraction": 0.1,
+        "n_train": 300
+      },
+      {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n_samples": 750,
+        "fraction": 0.25,
+        "n_train": 750
+      },
+      {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n_samples": 1500,
+        "fraction": 0.5,
+        "n_train": 1500
+      },
+      {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n_samples": 3000,
+        "fraction": 1.0,
+        "n_train": 3000
+      }
+    ]
+  }
+}
