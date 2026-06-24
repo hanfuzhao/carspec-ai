@@ -56,7 +56,6 @@ def step2_extract_features(train, val, test, sample_size=5000):
     X_val, val_sub = extract_batch(val, sample_size // 5)
     print("Extracting test set features...")
     X_test, test_sub = extract_batch(test, sample_size // 5)
-    # Save
     np.savez(
         "data/processed/features.npz",
         X_train=X_train, X_val=X_val, X_test=X_test,
@@ -115,7 +114,6 @@ def step5_train_deep(train, val, test, epochs=20, batch_size=32, use_aux=False):
     print("\n" + "=" * 60)
     print("Step 5: Train Deep multi-task model (MobileNetV2)")
     print("=" * 60)
-    # Build generator
     def multi_task_gen(df, batch_size, shuffle=True):
         gen = image_generator(df, batch_size=batch_size, shuffle=shuffle)
         while True:
@@ -155,9 +153,7 @@ def main():
     args = parser.parse_args()
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     start = time.time()
-    # Step 1
     train, val, test = step1_prepare_data()
-    # Step 2
     feats_path = Path("data/processed/features.npz")
     if feats_path.exists() and args.step <= 2:
         print("Loading existing features...")
@@ -170,11 +166,8 @@ def main():
         X_train, X_val, X_test, train_sub, val_sub, test_sub = step2_extract_features(
             train, val, test, args.sample_size
         )
-    # Step 3
     naive_results = step3_train_naive(train, val, test)
-    # Step 4
     classical_results = step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub)
-    # Step 5
     deep_results = {}
     if not args.skip_deep:
         try:
@@ -183,13 +176,11 @@ def main():
         except Exception as e:
             print(f"Deep model training failed: {e}")
             deep_results = {"status": "failed", "error": str(e)}
-    # Step 6
     y_train_car_type = train_sub["car_type"].values
     exp_results = step6_experiment(
         X_train, y_train_car_type,
         lambda: ClassicalModel(task="car_type", model_type="rf"),
     )
-    # Summary
     all_results = {
         "naive": naive_results,
         "classical": classical_results,
