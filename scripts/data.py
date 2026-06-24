@@ -14,22 +14,18 @@ SPLIT_DIR = Path("data/processed")
 METADATA_PATH = RAW_DIR / "metadata.json"
 SEED = 42
 
-# Car type labels (5 classes, based on CompCars type attribute)
 CAR_TYPES = ["sedan", "suv", "mpv", "coupe", "hatchback"]
 TYPE2ID = {name: i for i, name in enumerate(CAR_TYPES)}
 ID2TYPE = {i: name for i, name in enumerate(CAR_TYPES)}
 
-# Door count labels (3 classes)
 DOOR_COUNTS = ["2", "4", "5"]
 DOOR2ID = {name: i for i, name in enumerate(DOOR_COUNTS)}
 ID2DOOR = {i: name for i, name in enumerate(DOOR_COUNTS)}
 
-# Seat count labels (3 classes)
 SEAT_COUNTS = ["2", "5", "7"]
 SEAT2ID = {name: i for i, name in enumerate(SEAT_COUNTS)}
 ID2SEAT = {i: name for i, name in enumerate(SEAT_COUNTS)}
 
-# Multi-task label definitions
 TASKS = {
     "car_type": {"labels": CAR_TYPES, "id2label": ID2TYPE, "label2id": TYPE2ID},
     "door_count": {"labels": DOOR_COUNTS, "id2label": ID2DOOR, "label2id": DOOR2ID},
@@ -37,7 +33,7 @@ TASKS = {
 }
 
 IMG_SIZE = 224
-MAX_SAMPLES = int(os.environ.get("MAX_SAMPLES", "0"))  # 0=all
+MAX_SAMPLES = int(os.environ.get("MAX_SAMPLES", "0"))
 
 
 def _map_car_type(raw_type: str) -> str:
@@ -53,7 +49,7 @@ def _map_car_type(raw_type: str) -> str:
         return "coupe"
     if any(k in t for k in ["hatchback", "hatch"]):
         return "hatchback"
-    return "sedan"  # default
+    return "sedan"
 
 
 def _map_door_count(num_doors) -> str:
