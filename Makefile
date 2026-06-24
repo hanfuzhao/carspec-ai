@@ -1,4 +1,3 @@
-# CarSpec AI Makefile
 .PHONY: setup train deploy test clean help
 
 help:
