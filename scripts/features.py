@@ -1,16 +1,16 @@
-"""可解释视觉特征提取：车身比例、轮廓曲率、颜色统计、纹理特征.
+"""Interpretable visual feature extraction: body proportions, contour curvature, color statistics, texture features.
 
-这些特征用于：
-1. Classical ML 模型的输入（HOG+颜色+手工特征+SVM）
-2. Deep 模型的辅助输入（拼接在全局特征后）
-3. 提供可解释性（哪些视觉特征影响了预测）
+These features are used for:
+1. Input for Classical ML model (HOG+color+handcrafted features+SVM)
+2. Auxiliary input for Deep model (concatenated after global features)
+3. Provide interpretability (which visual features influenced predictions)
 """
 import numpy as np
 from PIL import Image
 
 
 def extract_color_histogram(img, bins=8):
-    """提取HSV颜色直方图."""
+    """Extract HSV color histogram."""
     hsv = np.array(Image.fromarray((img * 255).astype(np.uint8)).convert("HSV"), dtype=np.float32)
     h_hist = np.histogram(hsv[:, :, 0], bins=bins, range=(0, 180))[0]
     s_hist = np.histogram(hsv[:, :, 1], bins=bins, range=(0, 256))[0]
@@ -22,13 +22,13 @@ def extract_color_histogram(img, bins=8):
 
 
 def extract_aspect_ratio(img):
-    """车身宽高比（车辆通常宽>高）."""
+    """Body width-to-height ratio (vehicles are usually wider than tall)."""
     h, w = img.shape[:2]
     return np.array([w / h], dtype=np.float32)
 
 
 def extract_edge_density(img):
-    """边缘密度（Sobel算子）."""
+    """Edge density (Sobel operator)."""
     gray = np.mean(img, axis=2)
     gx = np.abs(np.gradient(gray, axis=1))
     gy = np.abs(np.gradient(gray, axis=0))
@@ -37,7 +37,7 @@ def extract_edge_density(img):
 
 
 def extract_body_proportion(img):
-    """车身比例特征：上半/下半亮度比，反映车身与车窗比例."""
+    """Body proportion features: upper/lower brightness ratio, reflects body-to-window ratio."""
     h, w = img.shape[:2]
     upper = img[:h // 2].mean()
     lower = img[h // 2:].mean()
@@ -45,14 +45,14 @@ def extract_body_proportion(img):
 
 
 def extract_symmetry(img):
-    """左右对称性（车辆通常左右对称）."""
+    """Left-right symmetry (vehicles are usually left-right symmetric)."""
     flipped = img[:, ::-1]
     diff = np.abs(img - flipped)
     return np.array([diff.mean()], dtype=np.float32)
 
 
 def extract_hog_features(img, orientations=8, pixels_per_cell=(32, 32)):
-    """简化版HOG特征."""
+    """Simplified HOG features."""
     try:
         from skimage.feature import hog
         gray = np.array(Image.fromarray((img * 255).astype(np.uint8)).convert("L"))
@@ -64,14 +64,14 @@ def extract_hog_features(img, orientations=8, pixels_per_cell=(32, 32)):
             block_norm="L2-Hys",
             feature_vector=True,
         )
-        # 降维：取统计量
+        # Dimensionality reduction: take statistics
         return np.array([features.mean(), features.std(), features.max()], dtype=np.float32)
     except ImportError:
         return np.zeros(3, dtype=np.float32)
 
 
 def extract_texture_features(img):
-    """简单纹理特征：局部二值模式统计."""
+    """Simple texture features: local binary pattern statistics."""
     gray = (np.mean(img, axis=2) * 255).astype(np.uint8)
     h, w = gray.shape
     lbp = np.zeros((h - 2, w - 2), dtype=np.uint8)
@@ -88,15 +88,15 @@ def extract_texture_features(img):
 
 
 def extract_all_features(img):
-    """提取全部可解释特征，拼接为向量."""
+    """Extract all interpretable features and concatenate into a vector."""
     return np.concatenate([
-        extract_color_histogram(img, bins=8),       # 24维
-        extract_aspect_ratio(img),                   # 1维
-        extract_edge_density(img),                   # 2维
-        extract_body_proportion(img),                # 3维
-        extract_symmetry(img),                       # 1维
-        extract_hog_features(img),                   # 3维
-        extract_texture_features(img),               # 16维
+        extract_color_histogram(img, bins=8),       # 24 dims
+        extract_aspect_ratio(img),                   # 1 dim
+        extract_edge_density(img),                   # 2 dims
+        extract_body_proportion(img),                # 3 dims
+        extract_symmetry(img),                       # 1 dim
+        extract_hog_features(img),                   # 3 dims
+        extract_texture_features(img),               # 16 dims
     ])
 
 
@@ -115,37 +115,37 @@ FEATURE_DIM = len(FEATURE_NAMES)
 
 
 def feature_importance_explanation(features, top_k=5):
-    """根据特征值生成可解释说明."""
+    """Generate interpretable explanations based on feature values."""
     explanations = []
-    # 颜色特征
+    # Color features
     h_hist = features[0:8]
     dominant_hue = int(np.argmax(h_hist))
-    hue_names = ["红", "橙", "黄", "绿", "青", "蓝", "紫", "粉"]
-    explanations.append(f"主色调: {hue_names[dominant_hue]}色系 (占比{h_hist[dominant_hue]:.1%})")
-    # 宽高比
+    hue_names = ["Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink"]
+    explanations.append(f"Dominant color: {hue_names[dominant_hue]} family (proportion {h_hist[dominant_hue]:.1%})")
+    # Aspect ratio
     ar = features[24]
     if ar > 1.2:
-        explanations.append(f"宽高比 {ar:.2f} → 偏向SUV/MPV（较宽）")
+        explanations.append(f"Aspect ratio {ar:.2f} -> leans toward SUV/MPV (wider)")
     else:
-        explanations.append(f"宽高比 {ar:.2f} → 偏向轿车/跑车（较矮）")
-    # 边缘密度
+        explanations.append(f"Aspect ratio {ar:.2f} -> leans toward sedan/coupe (lower)")
+    # Edge density
     edge_mean = features[25]
     if edge_mean > 0.1:
-        explanations.append(f"边缘密度高 ({edge_mean:.3f}) → 车身线条复杂")
+        explanations.append(f"High edge density ({edge_mean:.3f}) -> complex body lines")
     else:
-        explanations.append(f"边缘密度低 ({edge_mean:.3f}) → 车身线条简洁")
-    # 对称性
+        explanations.append(f"Low edge density ({edge_mean:.3f}) -> simple body lines")
+    # Symmetry
     sym = features[28]
-    explanations.append(f"左右对称性误差 {sym:.4f} → {'对称（正面视角）' if sym < 0.05 else '不对称（侧面视角）'}")
+    explanations.append(f"Left-right symmetry error {sym:.4f} -> {'symmetric (front view)' if sym < 0.05 else 'asymmetric (side view)'}")
     return explanations[:top_k]
 
 
 if __name__ == "__main__":
-    # 测试
+    # Test
     dummy = np.random.rand(224, 224, 3).astype(np.float32)
     feats = extract_all_features(dummy)
-    print(f"特征维度: {len(feats)}")
-    print(f"特征名称数: {len(FEATURE_NAMES)}")
-    print("\n可解释说明:")
+    print(f"Feature dimension: {len(feats)}")
+    print(f"Number of feature names: {len(FEATURE_NAMES)}")
+    print("\nInterpretable explanations:")
     for exp in feature_importance_explanation(feats):
         print(f"  - {exp}")

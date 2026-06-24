@@ -1,4 +1,4 @@
-"""训练管线：数据准备 → 特征提取 → 三模型训练 → 评估 → 实验."""
+"""Training pipeline: data preparation -> feature extraction -> three-model training -> evaluation -> experiment."""
 import os
 import sys
 import json
@@ -22,20 +22,20 @@ from scripts.experiment import (
 
 
 def step1_prepare_data():
-    """步骤1：准备数据划分."""
+    """Step 1: Prepare data splits."""
     print("\n" + "=" * 60)
-    print("步骤1: 准备数据划分")
+    print("Step 1: Prepare data splits")
     print("=" * 60)
     train, val, test = get_splits(force=False)
-    print(f"训练集: {len(train):,} | 验证集: {len(val):,} | 测试集: {len(test):,}")
-    print(f"\n训练集车型分布:\n{train['car_type'].value_counts()}")
+    print(f"Train set: {len(train):,} | Validation set: {len(val):,} | Test set: {len(test):,}")
+    print(f"\nTrain set car type distribution:\n{train['car_type'].value_counts()}")
     return train, val, test
 
 
 def step2_extract_features(train, val, test, sample_size=5000):
-    """步骤2：提取可解释视觉特征."""
+    """Step 2: Extract interpretable visual features."""
     print("\n" + "=" * 60)
-    print("步骤2: 提取可解释视觉特征")
+    print("Step 2: Extract interpretable visual features")
     print("=" * 60)
     def extract_batch(df, limit=None):
         if limit and len(df) > limit:
@@ -43,20 +43,20 @@ def step2_extract_features(train, val, test, sample_size=5000):
         feats = []
         for i, row in enumerate(df.itertuples()):
             if (i + 1) % 500 == 0:
-                print(f"  已处理 {i + 1}/{len(df)}")
+                print(f"  Processed {i + 1}/{len(df)}")
             try:
                 img = load_image(row.img_path, IMG_SIZE)
                 feats.append(extract_all_features(img))
             except Exception as e:
                 feats.append(np.zeros(FEATURE_DIM, dtype=np.float32))
         return np.array(feats), df.reset_index(drop=True)
-    print("提取训练集特征...")
+    print("Extracting train set features...")
     X_train, train_sub = extract_batch(train, sample_size)
-    print("提取验证集特征...")
+    print("Extracting validation set features...")
     X_val, val_sub = extract_batch(val, sample_size // 5)
-    print("提取测试集特征...")
+    print("Extracting test set features...")
     X_test, test_sub = extract_batch(test, sample_size // 5)
-    # 保存
+    # Save
     np.savez(
         "data/processed/features.npz",
         X_train=X_train, X_val=X_val, X_test=X_test,
@@ -64,14 +64,14 @@ def step2_extract_features(train, val, test, sample_size=5000):
     train_sub.to_csv("data/processed/train_sub.csv", index=False)
     val_sub.to_csv("data/processed/val_sub.csv", index=False)
     test_sub.to_csv("data/processed/test_sub.csv", index=False)
-    print(f"特征维度: {X_train.shape[1]}")
+    print(f"Feature dimension: {X_train.shape[1]}")
     return X_train, X_val, X_test, train_sub, val_sub, test_sub
 
 
 def step3_train_naive(train, val, test):
-    """步骤3：训练Naive基线模型."""
+    """Step 3: Train Naive baseline model."""
     print("\n" + "=" * 60)
-    print("步骤3: 训练 Naive 基线模型")
+    print("Step 3: Train Naive baseline model")
     print("=" * 60)
     results = {}
     for task, label2id in [("car_type", TYPE2ID), ("door_count", DOOR2ID), ("seat_count", SEAT2ID)]:
@@ -89,9 +89,9 @@ def step3_train_naive(train, val, test):
 
 
 def step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub):
-    """步骤4：训练Classical ML模型."""
+    """Step 4: Train Classical ML model."""
     print("\n" + "=" * 60)
-    print("步骤4: 训练 Classical ML 模型 (随机森林)")
+    print("Step 4: Train Classical ML model (Random Forest)")
     print("=" * 60)
     results = {}
     for task, label2id, classes in [
@@ -111,11 +111,11 @@ def step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub):
 
 
 def step5_train_deep(train, val, test, epochs=20, batch_size=32, use_aux=False):
-    """步骤5：训练Deep多任务模型."""
+    """Step 5: Train Deep multi-task model."""
     print("\n" + "=" * 60)
-    print("步骤5: 训练 Deep 多任务模型 (MobileNetV2)")
+    print("Step 5: Train Deep multi-task model (MobileNetV2)")
     print("=" * 60)
-    # 构建生成器
+    # Build generator
     def multi_task_gen(df, batch_size, shuffle=True):
         gen = image_generator(df, batch_size=batch_size, shuffle=shuffle)
         while True:
@@ -131,36 +131,36 @@ def step5_train_deep(train, val, test, epochs=20, batch_size=32, use_aux=False):
         steps_per_epoch=steps, validation_steps=val_steps,
     )
     model.save(MODELS_DIR / "deep_multitask.pt")
-    print("Deep 模型已保存")
+    print("Deep model saved")
     return model, history
 
 
 def step6_experiment(X_train, y_train, model_factory):
-    """步骤6：数据规模敏感性实验."""
+    """Step 6: Data size sensitivity experiment."""
     print("\n" + "=" * 60)
-    print("步骤6: 数据规模敏感性实验")
+    print("Step 6: Data size sensitivity experiment")
     print("=" * 60)
     results = data_size_sensitivity(model_factory, X_train, y_train)
     for r in results:
-        print(f"  {r['fraction']:.0%} ({r['n_train']}样本): acc={r['accuracy']:.3f}")
+        print(f"  {r['fraction']:.0%} ({r['n_train']} samples): acc={r['accuracy']:.3f}")
     return results
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CarSpec AI 训练管线")
-    parser.add_argument("--step", type=int, default=0, help="从指定步骤开始 (0=全部)")
-    parser.add_argument("--sample-size", type=int, default=5000, help="特征提取样本数")
-    parser.add_argument("--epochs", type=int, default=20, help="Deep模型训练轮数")
-    parser.add_argument("--skip-deep", action="store_true", help="跳过Deep模型训练")
+    parser = argparse.ArgumentParser(description="CarSpec AI training pipeline")
+    parser.add_argument("--step", type=int, default=0, help="Start from specified step (0=all)")
+    parser.add_argument("--sample-size", type=int, default=5000, help="Number of samples for feature extraction")
+    parser.add_argument("--epochs", type=int, default=20, help="Number of training epochs for Deep model")
+    parser.add_argument("--skip-deep", action="store_true", help="Skip Deep model training")
     args = parser.parse_args()
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     start = time.time()
-    # 步骤1
+    # Step 1
     train, val, test = step1_prepare_data()
-    # 步骤2
+    # Step 2
     feats_path = Path("data/processed/features.npz")
     if feats_path.exists() and args.step <= 2:
-        print("加载已有特征...")
+        print("Loading existing features...")
         data = np.load(feats_path)
         X_train, X_val, X_test = data["X_train"], data["X_val"], data["X_test"]
         train_sub = pd.read_csv("data/processed/train_sub.csv")
@@ -170,26 +170,26 @@ def main():
         X_train, X_val, X_test, train_sub, val_sub, test_sub = step2_extract_features(
             train, val, test, args.sample_size
         )
-    # 步骤3
+    # Step 3
     naive_results = step3_train_naive(train, val, test)
-    # 步骤4
+    # Step 4
     classical_results = step4_train_classical(X_train, X_val, X_test, train_sub, val_sub, test_sub)
-    # 步骤5
+    # Step 5
     deep_results = {}
     if not args.skip_deep:
         try:
             deep_model, history = step5_train_deep(train, val, test, args.epochs)
             deep_results = {"status": "trained"}
         except Exception as e:
-            print(f"Deep 模型训练失败: {e}")
+            print(f"Deep model training failed: {e}")
             deep_results = {"status": "failed", "error": str(e)}
-    # 步骤6
+    # Step 6
     y_train_car_type = train_sub["car_type"].values
     exp_results = step6_experiment(
         X_train, y_train_car_type,
         lambda: ClassicalModel(task="car_type", model_type="rf"),
     )
-    # 汇总
+    # Summary
     all_results = {
         "naive": naive_results,
         "classical": classical_results,
@@ -197,8 +197,8 @@ def main():
         "experiment_data_size": exp_results,
     }
     run_full_evaluation(all_results)
-    print(f"\n总耗时: {time.time() - start:.1f}s")
-    print("训练管线完成！")
+    print(f"\nTotal time: {time.time() - start:.1f}s")
+    print("Training pipeline complete!")
 
 
 if __name__ == "__main__":

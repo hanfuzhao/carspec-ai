@@ -1,4 +1,4 @@
-// CarSpec AI — 前端交互逻辑
+// CarSpec AI — Frontend Interaction Logic
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const preview = document.getElementById('preview');
@@ -9,7 +9,7 @@ const resultsSection = document.getElementById('results');
 
 let selectedFile = null;
 
-// 上传区域交互
+// Upload Area Interaction
 uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFile(file) {
     if (!file.type.startsWith('image/')) {
-        alert('请上传图片文件');
+        alert('Please upload an image file');
         return;
     }
     selectedFile = file;
@@ -41,7 +41,7 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
-// 预测
+// Predict
 predictBtn.addEventListener('click', async () => {
     if (!selectedFile) return;
     predictBtn.disabled = true;
@@ -55,7 +55,7 @@ predictBtn.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
         displayResults(data);
     } catch (err) {
-        alert('预测失败: ' + err.message);
+        alert('Prediction failed: ' + err.message);
     } finally {
         predictBtn.disabled = false;
         loading.style.display = 'none';
@@ -64,15 +64,15 @@ predictBtn.addEventListener('click', async () => {
 
 function displayResults(data) {
     resultsSection.style.display = 'block';
-    // Classical 结果
+    // Classical Results
     const classical = data.classical || {};
     const deep = data.deep || {};
-    // 优先显示 Deep，回退 Classical
+    // Show Deep first, fallback to Classical
     const source = deep || classical;
     if (source.car_type) updateCard('CarType', source.car_type);
     if (source.door_count) updateCard('DoorCount', source.door_count);
     if (source.seat_count) updateCard('SeatCount', source.seat_count);
-    // 可解释说明
+    // Interpretable Explanations
     const expList = document.getElementById('explanationList');
     expList.innerHTML = '';
     (data.explanations || []).forEach(exp => {
@@ -81,18 +81,18 @@ function displayResults(data) {
         item.innerHTML = `<span class="icon">▸</span><span>${exp}</span>`;
         expList.appendChild(item);
     });
-    // 模型对比
+    // Model Comparison
     const compGrid = document.getElementById('comparisonGrid');
     compGrid.innerHTML = `
         <div class="comparison-col">
-            <h4>Classical ML (随机森林)</h4>
+            <h4>Classical ML (Random Forest)</h4>
             <div class="comparison-result">${classical.car_type ? classical.car_type.prediction : '—'}</div>
-            ${classical.car_type ? `<div style="color:var(--success);font-size:14px">置信度 ${(classical.car_type.confidence*100).toFixed(1)}%</div>` : ''}
+            ${classical.car_type ? `<div style="color:var(--success);font-size:14px">Confidence ${(classical.car_type.confidence*100).toFixed(1)}%</div>` : ''}
         </div>
         <div class="comparison-col">
             <h4>Deep Learning (ResNet50)</h4>
             <div class="comparison-result">${deep.car_type ? deep.car_type.prediction : '—'}</div>
-            ${deep.car_type ? `<div style="color:var(--success);font-size:14px">置信度 ${(deep.car_type.confidence*100).toFixed(1)}%</div>` : ''}
+            ${deep.car_type ? `<div style="color:var(--success);font-size:14px">Confidence ${(deep.car_type.confidence*100).toFixed(1)}%</div>` : ''}
         </div>
     `;
     resultsSection.scrollIntoView({ behavior: 'smooth' });
@@ -100,7 +100,7 @@ function displayResults(data) {
 
 function updateCard(suffix, result) {
     document.getElementById('res' + suffix).textContent = result.prediction;
-    document.getElementById('conf' + suffix).textContent = `置信度 ${(result.confidence * 100).toFixed(1)}%`;
+    document.getElementById('conf' + suffix).textContent = `Confidence ${(result.confidence * 100).toFixed(1)}%`;
     const probsDiv = document.getElementById('probs' + suffix);
     probsDiv.innerHTML = '';
     const probs = result.probabilities || {};

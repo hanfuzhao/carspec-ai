@@ -8,70 +8,70 @@ app_port: 7860
 pinned: false
 ---
 
-# CarSpec AI — 车辆多属性智能识别系统
+# CarSpec AI — Vehicle Multi-Attribute Intelligent Recognition System
 
-> Module 2 Project · Computer Vision · 基于 CompCars 数据集
+> Module 2 Project · Computer Vision · Based on the CompCars Dataset
 
-## 项目简介
+## Project Introduction
 
-CarSpec AI 是一个基于计算机视觉的车辆多属性识别系统。上传一张车辆外观照片，系统同时预测 **车型类型**、**门数**、**座位数** 三个属性，并提供可解释的视觉特征分析。
+CarSpec AI is a computer vision-based vehicle multi-attribute recognition system. Upload a vehicle exterior photo, and the system simultaneously predicts three attributes: **vehicle type**, **door count**, and **seat count**, and provides interpretable visual feature analysis.
 
-## 核心创新
+## Core Innovations
 
-1. **多任务联合学习**：MobileNetV2 共享 backbone + 三个分类头，利用任务间相关性提升性能
-2. **可解释视觉特征**：提取 50+ 手工特征（颜色直方图、HOG、纹理、车身比例、对称性），提供比纯 CNN 更好的可解释性
-3. **三模型对比**：Naive 基线 / Classical ML（随机森林）/ Deep Learning（MobileNetV2 多任务）
+1. **Multi-task Joint Learning**: MobileNetV2 shared backbone + three classification heads, leveraging task correlations to improve performance
+2. **Interpretable Visual Features**: Extract 50+ handcrafted features (color histogram, HOG, texture, body proportions, symmetry), providing better interpretability than pure CNNs
+3. **Three-Model Comparison**: Naive baseline / Classical ML (Random Forest) / Deep Learning (MobileNetV2 multi-task)
 
-## 在线 Demo
+## Online Demo
 
-访问 HuggingFace Space: https://hanfuzhao781-carspec-ai.hf.space
+Visit the HuggingFace Space: https://hanfuzhao781-carspec-ai.hf.space
 
-## 项目结构
+## Project Structure
 
 ```
 ├── README.md
-├── REPORT.md               <- 完整项目报告
+├── REPORT.md               <- Full project report
 ├── requirements.txt
 ├── Makefile
-├── setup.py                <- 训练管线
-├── main.py                 <- Flask Web 应用
+├── setup.py                <- Training pipeline
+├── main.py                 <- Flask web application
 ├── Dockerfile
 ├── scripts/
-│   ├── data.py             <- 数据加载
-│   ├── make_dataset.py     <- 数据下载
-│   ├── synthetic_data.py   <- 合成数据生成
-│   ├── features.py         <- 可解释特征提取
-│   ├── model.py            <- 三个模型实现
-│   └── experiment.py       <- 实验框架
-├── models/                 <- 训练好的模型
+│   ├── data.py             <- Data loading
+│   ├── make_dataset.py     <- Data download
+│   ├── synthetic_data.py   <- Synthetic data generation
+│   ├── features.py         <- Interpretable feature extraction
+│   ├── model.py            <- Three model implementations
+│   └── experiment.py       <- Experiment framework
+├── models/                 <- Trained models
 ├── data/
-│   ├── raw/                <- 原始数据
-│   ├── processed/          <- 处理后数据
-│   └── outputs/            <- 输出结果
-├── static/                 <- 前端资源
-├── templates/              <- HTML 模板
-└── .github/                <- CI/PR 模板
+│   ├── raw/                <- Raw data
+│   ├── processed/          <- Processed data
+│   └── outputs/            <- Output results
+├── static/                 <- Frontend assets
+├── templates/              <- HTML templates
+└── .github/                <- CI/PR templates
 ```
 
-## 三个模型位置
+## Three Model Locations
 
-| 模型 | 代码位置 | 训练后模型 |
+| Model | Code Location | Trained Model |
 |------|---------|-----------|
-| Naive 基线 | `scripts/model.py` → `NaiveBaseline` 类 | `models/naive_*.pkl` |
-| Classical ML | `scripts/model.py` → `ClassicalModel` 类 | `models/classical_*.pkl` |
-| Deep Learning | `scripts/model.py` → `DeepMultiTaskModel` 类 | `models/deep_multitask.pt` |
+| Naive Baseline | `scripts/model.py` → `NaiveBaseline` class | `models/naive_*.pkl` |
+| Classical ML | `scripts/model.py` → `ClassicalModel` class | `models/classical_*.pkl` |
+| Deep Learning | `scripts/model.py` → `DeepMultiTaskModel` class | `models/deep_multitask.pt` |
 
-## 数据集
+## Dataset
 
-**CompCars** (CVPR 2015)：136,726 张整车图片，标注车型类型、门数、座位数、最大速度、排量等属性。
+**CompCars** (CVPR 2015): 136,726 whole-vehicle images, annotated with vehicle type, door count, seat count, maximum speed, displacement, and other attributes.
 
-- 官网: http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/
-- 论文: Yang et al., "A Large-Scale Car Dataset for Fine-Grained Categorization and Verification"
+- Official website: http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/
+- Paper: Yang et al., "A Large-Scale Car Dataset for Fine-Grained Categorization and Verification"
 
-## 技术栈
+## Tech Stack
 
-- **深度学习**: PyTorch, torchvision MobileNetV2
-- **经典 ML**: scikit-learn, 随机森林
-- **特征工程**: scikit-image (HOG), LBP 纹理
-- **Web 框架**: Flask
-- **部署**: Docker, HuggingFace Spaces
+- **Deep Learning**: PyTorch, torchvision MobileNetV2
+- **Classical ML**: scikit-learn, Random Forest
+- **Feature Engineering**: scikit-image (HOG), LBP texture
+- **Web Framework**: Flask
+- **Deployment**: Docker, HuggingFace Spaces

@@ -1,4 +1,4 @@
-# 数据
+# Data
 data/raw/
 data/processed/*.npz
 data/processed/*_sub.csv
@@ -7,7 +7,7 @@ data/outputs/
 !data/processed/.gitkeep
 !data/outputs/.gitkeep
 
-# 模型（部署时从 HuggingFace Hub 下载）
+# Models (downloaded from HuggingFace Hub during deployment)
 models/*.pkl
 models/*.pt
 models/*.h5
@@ -23,7 +23,7 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# 环境
+# Environment
 .env
 venv/
 env/
@@ -39,6 +39,6 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# 临时文件
+# Temporary files
 *.log
 *.tmp
