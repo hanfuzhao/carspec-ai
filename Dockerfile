@@ -2,12 +2,12 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# 系统依赖
+# 系统依赖（libgl1 替代 libgl1-mesa-glx）
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx libglib2.0-0 \
+    libgl1 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Python 依赖（不含 torch，减小镜像体积）
+# Python 依赖（轻量，不含 torch）
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
