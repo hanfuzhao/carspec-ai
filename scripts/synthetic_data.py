@@ -1,7 +1,7 @@
-"""合成数据生成器：生成模拟车辆图片用于流程验证.
+"""Synthetic data generator: generate simulated vehicle images for pipeline validation.
 
-当 CompCars 数据集未下载时，使用此模块生成合成数据。
-合成数据通过不同形状、颜色、大小模拟不同车型属性。
+When the CompCars dataset is not downloaded, use this module to generate synthetic data.
+Synthetic data simulates different vehicle attributes through different shapes, colors, and sizes.
 """
 import os
 import json
@@ -15,7 +15,7 @@ IMG_DIR = RAW_DIR / "image"
 PART_DIR = RAW_DIR / "part"
 SEED = 42
 
-# 车型参数模板：每种车型有不同的形状特征
+# Car type parameter templates: each car type has different shape characteristics
 CAR_TEMPLATES = {
     "sedan": {"body_h": 80, "body_w": 200, "roof_h": 50, "roof_w": 100, "roof_offset": 30},
     "suv": {"body_h": 110, "body_w": 200, "roof_h": 80, "roof_w": 130, "roof_offset": 20},
@@ -24,7 +24,7 @@ CAR_TEMPLATES = {
     "hatchback": {"body_h": 90, "body_w": 180, "roof_h": 60, "roof_w": 110, "roof_offset": 25},
 }
 
-# 属性关联：车型 → 门数/座位数的典型分布
+# Attribute correlation: car type -> typical distribution of door count/seat count
 ATTR_PROBS = {
     "sedan": {"door": {"2": 0.2, "4": 0.7, "5": 0.1}, "seat": {"2": 0.1, "5": 0.8, "7": 0.1}},
     "suv": {"door": {"2": 0.1, "4": 0.6, "5": 0.3}, "seat": {"2": 0.05, "5": 0.5, "7": 0.45}},
@@ -40,42 +40,42 @@ CAR_COLORS = [
 
 
 def draw_car(img_size, car_type, color, door_count, seat_count):
-    """绘制模拟车辆图片."""
+    """Draw a simulated vehicle image."""
     img = Image.new("RGB", (img_size, img_size), (240, 240, 240))
     draw = ImageDraw.Draw(img)
     tpl = CAR_TEMPLATES[car_type]
     cx, cy = img_size // 2, img_size // 2
-    # 车身
+    # Body
     bx1 = cx - tpl["body_w"] // 2
     by1 = cy - tpl["body_h"] // 2 + 20
     bx2 = cx + tpl["body_w"] // 2
     by2 = cy + tpl["body_h"] // 2 + 20
     draw.rounded_rectangle([bx1, by1, bx2, by2], radius=15, fill=color)
-    # 车顶
+    # Roof
     rx1 = cx - tpl["roof_w"] // 2 + tpl["roof_offset"]
     ry1 = by1 - tpl["roof_h"]
     rx2 = rx1 + tpl["roof_w"]
     ry2 = by1 + 5
     draw.rounded_rectangle([rx1, ry1, rx2, ry2], radius=10, fill=tuple(min(c + 30, 255) for c in color))
-    # 车窗
+    # Window
     wx1 = rx1 + 10
     wy1 = ry1 + 10
     wx2 = rx2 - 10
     wy2 = ry2 - 5
     draw.rounded_rectangle([wx1, wy1, wx2, wy2], radius=5, fill=(100, 150, 200))
-    # 车轮
+    # Wheels
     wheel_r = 18
     wheel_y = by2 - 5
     for wx in [bx1 + 40, bx2 - 40]:
         draw.ellipse([wx - wheel_r, wheel_y - wheel_r, wx + wheel_r, wheel_y + wheel_r], fill=(30, 30, 30))
         draw.ellipse([wx - 8, wheel_y - 8, wx + 8, wheel_y + 8], fill=(150, 150, 150))
-    # 门线（根据门数）
+    # Door lines (based on door count)
     n_doors = int(door_count)
     door_w = tpl["body_w"] / (n_doors + 1)
     for i in range(1, n_doors + 1):
         dx = bx1 + int(door_w * i)
         draw.line([dx, by1 + 10, dx, by2 - 10], fill=(80, 80, 80), width=2)
-    # 背景纹理
+    # Background texture
     noise = np.random.randint(-10, 10, (img_size, img_size, 3), dtype=np.int16)
     arr = np.array(img, dtype=np.int16) + noise
     arr = np.clip(arr, 0, 255).astype(np.uint8)
@@ -83,7 +83,7 @@ def draw_car(img_size, car_type, color, door_count, seat_count):
 
 
 def generate_synthetic_dataset(n_samples=6000, img_size=224):
-    """生成合成数据集."""
+    """Generate synthetic dataset."""
     np.random.seed(SEED)
     IMG_DIR.mkdir(parents=True, exist_ok=True)
     PART_DIR.mkdir(parents=True, exist_ok=True)
@@ -92,12 +92,12 @@ def generate_synthetic_dataset(n_samples=6000, img_size=224):
     for i in range(n_samples):
         car_type = np.random.choice(car_types)
         color = CAR_COLORS[np.random.randint(len(CAR_COLORS))]
-        # 根据车型采样门数和座位数
+        # Sample door count and seat count based on car type
         door_probs = ATTR_PROBS[car_type]["door"]
         door_count = np.random.choice(list(door_probs.keys()), p=list(door_probs.values()))
         seat_probs = ATTR_PROBS[car_type]["seat"]
         seat_count = np.random.choice(list(seat_probs.keys()), p=list(seat_probs.values()))
-        # 生成图片
+        # Generate image
         img = draw_car(img_size, car_type, color, door_count, seat_count)
         model_id = i % 100 + 1
         img_subdir = str(model_id)
@@ -106,7 +106,7 @@ def generate_synthetic_dataset(n_samples=6000, img_size=224):
         img_name = f"{i:06d}.jpg"
         img_path = img_subdir_path / img_name
         img.save(img_path, quality=90)
-        # 随机属性
+        # Random attributes
         max_speed = np.random.randint(120, 300)
         displacement = np.random.choice([1.5, 2.0, 2.5, 3.0, 4.0])
         rows.append({
@@ -119,9 +119,9 @@ def generate_synthetic_dataset(n_samples=6000, img_size=224):
             "displacement": displacement,
         })
         if (i + 1) % 1000 == 0:
-            print(f"  生成 {i + 1}/{n_samples}")
+            print(f"  Generated {i + 1}/{n_samples}")
     df = pd.DataFrame(rows)
-    # 生成属性文件
+    # Generate attribute file
     attr_data = []
     for mid in df["model_id"].unique():
         sub = df[df["model_id"] == mid].iloc[0]
@@ -135,14 +135,14 @@ def generate_synthetic_dataset(n_samples=6000, img_size=224):
         })
     with open(PART_DIR / "attr.json", "w") as f:
         json.dump(attr_data, f)
-    # 生成 train_test_split
+    # Generate train_test_split
     with open(PART_DIR / "train_test_split", "w") as f:
         for _, row in df.iterrows():
             rel_path = f"{row['model_id']}/{Path(row['img_path']).name}"
             is_test = 1 if np.random.random() < 0.2 else 0
             f.write(f"{rel_path} {row['model_id']} {is_test}\n")
-    print(f"合成数据集生成完成: {n_samples} 张图片")
-    print(f"车型分布:\n{df['car_type'].value_counts()}")
+    print(f"Synthetic dataset generation complete: {n_samples} images")
+    print(f"Car type distribution:\n{df['car_type'].value_counts()}")
     return df
 
 

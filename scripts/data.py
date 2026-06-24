@@ -1,4 +1,4 @@
-"""CompCars 数据集加载与预处理."""
+"""CompCars dataset loading and preprocessing."""
 import os
 import json
 import re
@@ -14,22 +14,22 @@ SPLIT_DIR = Path("data/processed")
 METADATA_PATH = RAW_DIR / "metadata.json"
 SEED = 42
 
-# 车型类型标签（5类，基于CompCars的type属性）
+# Car type labels (5 classes, based on CompCars type attribute)
 CAR_TYPES = ["sedan", "suv", "mpv", "coupe", "hatchback"]
 TYPE2ID = {name: i for i, name in enumerate(CAR_TYPES)}
 ID2TYPE = {i: name for i, name in enumerate(CAR_TYPES)}
 
-# 门数标签（3类）
+# Door count labels (3 classes)
 DOOR_COUNTS = ["2", "4", "5"]
 DOOR2ID = {name: i for i, name in enumerate(DOOR_COUNTS)}
 ID2DOOR = {i: name for i, name in enumerate(DOOR_COUNTS)}
 
-# 座位数标签（3类）
+# Seat count labels (3 classes)
 SEAT_COUNTS = ["2", "5", "7"]
 SEAT2ID = {name: i for i, name in enumerate(SEAT_COUNTS)}
 ID2SEAT = {i: name for i, name in enumerate(SEAT_COUNTS)}
 
-# 多任务标签定义
+# Multi-task label definitions
 TASKS = {
     "car_type": {"labels": CAR_TYPES, "id2label": ID2TYPE, "label2id": TYPE2ID},
     "door_count": {"labels": DOOR_COUNTS, "id2label": ID2DOOR, "label2id": DOOR2ID},
@@ -37,11 +37,11 @@ TASKS = {
 }
 
 IMG_SIZE = 224
-MAX_SAMPLES = int(os.environ.get("MAX_SAMPLES", "0"))  # 0=全部
+MAX_SAMPLES = int(os.environ.get("MAX_SAMPLES", "0"))  # 0=all
 
 
 def _map_car_type(raw_type: str) -> str:
-    """将CompCars原始车型映射到5类."""
+    """Map CompCars raw car type to 5 classes."""
     t = str(raw_type).lower().strip()
     if any(k in t for k in ["sedan", "saloon"]):
         return "sedan"
@@ -53,11 +53,11 @@ def _map_car_type(raw_type: str) -> str:
         return "coupe"
     if any(k in t for k in ["hatchback", "hatch"]):
         return "hatchback"
-    return "sedan"  # 默认
+    return "sedan"  # default
 
 
 def _map_door_count(num_doors) -> str:
-    """门数映射到3类."""
+    """Map door count to 3 classes."""
     try:
         n = int(float(num_doors))
     except (ValueError, TypeError):
@@ -70,7 +70,7 @@ def _map_door_count(num_doors) -> str:
 
 
 def _map_seat_count(num_seats) -> str:
-    """座位数映射到3类."""
+    """Map seat count to 3 classes."""
     try:
         n = int(float(num_seats))
     except (ValueError, TypeError):
@@ -83,11 +83,11 @@ def _map_seat_count(num_seats) -> str:
 
 
 def load_attributes() -> pd.DataFrame:
-    """加载CompCars属性数据."""
+    """Load CompCars attribute data."""
     attr_path = PART_DIR / "attr.json"
     if not attr_path.exists():
         raise FileNotFoundError(
-            f"属性文件不存在: {attr_path}。请先运行 make_dataset.py 下载或手动放置数据。"
+            f"Attribute file does not exist: {attr_path}. Please run make_dataset.py to download or manually place the data first."
         )
     with open(attr_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -111,11 +111,11 @@ def load_attributes() -> pd.DataFrame:
 
 
 def load_image_labels() -> pd.DataFrame:
-    """加载图片标签数据，关联属性."""
+    """Load image label data and associate attributes."""
     label_path = PART_DIR / "train_test_split"
     if not label_path.exists():
         raise FileNotFoundError(
-            f"标签文件不存在: {label_path}。请先运行 make_dataset.py 下载或手动放置数据。"
+            f"Label file does not exist: {label_path}. Please run make_dataset.py to download or manually place the data first."
         )
     attr_df = load_attributes()
     attr_by_id = attr_df.set_index("model_id").to_dict("index")
@@ -153,7 +153,7 @@ def load_image_labels() -> pd.DataFrame:
 
 
 def make_splits(df: pd.DataFrame, seed: int = SEED):
-    """按车型分层划分训练/验证/测试集."""
+    """Stratified split of train/validation/test sets by car type."""
     rng = np.random.RandomState(seed)
     train, val, test = ([], [], [])
     for _, grp in df.groupby("car_type"):
@@ -173,7 +173,7 @@ def make_splits(df: pd.DataFrame, seed: int = SEED):
 
 
 def get_splits(force: bool = False):
-    """获取数据划分，带缓存."""
+    """Get data splits with cache."""
     SPLIT_DIR.mkdir(parents=True, exist_ok=True)
     paths = {s: SPLIT_DIR / f"{s}.csv" for s in ("train", "val", "test")}
     if all(p.exists() for p in paths.values()) and not force:
@@ -186,14 +186,14 @@ def get_splits(force: bool = False):
 
 
 def load_image(path: str, size: int = IMG_SIZE):
-    """加载并预处理单张图片."""
+    """Load and preprocess a single image."""
     img = Image.open(path).convert("RGB")
     img = img.resize((size, size), Image.BILINEAR)
     return np.array(img, dtype=np.float32) / 255.0
 
 
 def image_generator(df: pd.DataFrame, batch_size=32, size=IMG_SIZE, shuffle=True, seed=SEED):
-    """图片批量生成器，用于深度学习训练."""
+    """Image batch generator for deep learning training."""
     rng = np.random.RandomState(seed)
     n = len(df)
     indices = np.arange(n)
@@ -225,10 +225,10 @@ def image_generator(df: pd.DataFrame, batch_size=32, size=IMG_SIZE, shuffle=True
 
 if __name__ == "__main__":
     df = load_image_labels()
-    print(f"加载 {len(df):,} 张图片")
-    print("\n车型分布:")
+    print(f"Loaded {len(df):,} images")
+    print("\nCar type distribution:")
     print(df["car_type"].value_counts())
-    print("\n门数分布:")
+    print("\nDoor count distribution:")
     print(df["door_count"].value_counts())
-    print("\n座位数分布:")
+    print("\nSeat count distribution:")
     print(df["seat_count"].value_counts())

@@ -1,12 +1,12 @@
-"""三个模型实现：Naive基线、Classical ML、Deep多任务学习.
+"""Three model implementations: Naive baseline, Classical ML, Deep multi-task learning.
 
-统一接口：
-- fit(X, y) 训练
-- predict(X) 预测类别
-- predict_proba(X) 预测概率
-- save(path) / load(path) 持久化
+Unified interface:
+- fit(X, y) train
+- predict(X) predict class
+- predict_proba(X) predict probability
+- save(path) / load(path) persistence
 
-Deep 模型使用 PyTorch + torchvision ResNet50.
+Deep model uses PyTorch + torchvision ResNet50.
 """
 import os
 import json
@@ -24,10 +24,10 @@ SEED = 42
 
 
 # ============================================================
-# 1. Naive 基线模型
+# 1. Naive baseline model
 # ============================================================
 class NaiveBaseline:
-    """多数类基线：始终预测训练集中最常见的类别."""
+    """Majority class baseline: always predicts the most frequent class in the training set."""
 
     def __init__(self, task="car_type"):
         self.task = task
@@ -63,10 +63,10 @@ class NaiveBaseline:
 
 
 # ============================================================
-# 2. Classical ML 模型
+# 2. Classical ML model
 # ============================================================
 class ClassicalModel:
-    """经典ML：可解释视觉特征 + 随机森林."""
+    """Classical ML: interpretable visual features + Random Forest."""
 
     def __init__(self, task="car_type", model_type="rf"):
         self.task = task
@@ -122,15 +122,15 @@ class ClassicalModel:
 
 
 # ============================================================
-# 3. Deep Learning 多任务模型 (PyTorch)
+# 3. Deep Learning multi-task model (PyTorch)
 # ============================================================
 class DeepMultiTaskModel:
-    """ResNet50迁移学习 + 多任务分类头 (PyTorch).
+    """ResNet50 transfer learning + multi-task classification head (PyTorch).
 
-    共享 backbone，三个分类头分别预测：
-    - car_type (5类)
-    - door_count (3类)
-    - seat_count (3类)
+    Shared backbone, three classification heads predict respectively:
+    - car_type (5 classes)
+    - door_count (3 classes)
+    - seat_count (3 classes)
     """
 
     def __init__(self, backbone="resnet50", use_aux_features=False, aux_dim=50, device=None):
@@ -218,7 +218,7 @@ class DeepMultiTaskModel:
                 total_loss += loss.item()
             avg_loss = total_loss / max(steps_per_epoch or 100, 1)
             history["train_loss"].append(avg_loss)
-            # 验证
+            # Validation
             self.model.eval()
             correct, total = 0, 0
             with torch.no_grad():
@@ -318,7 +318,7 @@ def _torch_cuda():
 
 
 # ============================================================
-# 工厂函数
+# Factory function
 # ============================================================
 def get_model(model_name: str, task: str = "car_type", **kwargs):
     if model_name == "naive":
@@ -327,7 +327,7 @@ def get_model(model_name: str, task: str = "car_type", **kwargs):
         return ClassicalModel(task=task, **kwargs)
     if model_name == "deep":
         return DeepMultiTaskModel(**kwargs)
-    raise ValueError(f"未知模型: {model_name}")
+    raise ValueError(f"Unknown model: {model_name}")
 
 
 def load_trained_model(model_name: str, task: str = "car_type"):
@@ -346,7 +346,7 @@ def load_trained_model(model_name: str, task: str = "car_type"):
 
 
 if __name__ == "__main__":
-    print("可用模型: naive, classical, deep")
+    print("Available models: naive, classical, deep")
     m = NaiveBaseline()
     m.fit(None, np.array(["sedan", "sedan", "suv"]))
     print(f"  classes: {m.classes_}")

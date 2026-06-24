@@ -1,4 +1,4 @@
-"""实验框架：评估指标、多任务vs单任务对比、数据规模敏感性、错误分析."""
+"""Experiment framework: evaluation metrics, multi-task vs single-task comparison, data size sensitivity, error analysis."""
 import json
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def compute_metrics(y_true, y_pred, classes=None):
-    """计算分类指标."""
+    """Compute classification metrics."""
     acc = accuracy_score(y_true, y_pred)
     p, r, f1, _ = precision_recall_fscore_support(
         y_true, y_pred, average="weighted", zero_division=0
@@ -32,7 +32,7 @@ def compute_metrics(y_true, y_pred, classes=None):
 
 
 def plot_confusion_matrix(y_true, y_pred, classes, title, save_path):
-    """绘制混淆矩阵."""
+    """Plot confusion matrix."""
     cm = confusion_matrix(y_true, y_pred, labels=classes)
     fig, ax = plt.subplots(figsize=(8, 6))
     im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
@@ -53,10 +53,10 @@ def plot_confusion_matrix(y_true, y_pred, classes, title, save_path):
 
 
 def evaluate_model(model, X, y, task_name, classes, model_name):
-    """评估单个模型并保存结果."""
+    """Evaluate a single model and save results."""
     y_pred = model.predict(X)
     metrics = compute_metrics(y, y_pred, classes)
-    # 混淆矩阵
+    # Confusion matrix
     plot_confusion_matrix(
         y, y_pred, classes,
         f"{model_name} - {task_name} (Acc={metrics['accuracy']:.3f})",
@@ -66,7 +66,7 @@ def evaluate_model(model, X, y, task_name, classes, model_name):
 
 
 def error_analysis(model, X, y, df_meta, task_name, classes, model_name, top_k=5):
-    """错误分析：找出5个具体误预测."""
+    """Error analysis: find 5 specific mispredictions."""
     y_pred = model.predict(X)
     errors = []
     for i, (true, pred) in enumerate(zip(y, y_pred)):
@@ -79,12 +79,12 @@ def error_analysis(model, X, y, df_meta, task_name, classes, model_name, top_k=5
                 "pred_label": str(pred),
                 "model_id": str(row.get("model_id", "")) if hasattr(row, "get") else "",
             })
-    # 取前5个
+    # Take first 5
     return errors[:top_k]
 
 
 def data_size_sensitivity(model_factory, X_pool, y_pool, fractions=(0.1, 0.25, 0.5, 1.0)):
-    """训练数据规模敏感性分析."""
+    """Training data size sensitivity analysis."""
     results = []
     n = len(y_pool)
     for frac in fractions:
@@ -103,7 +103,7 @@ def data_size_sensitivity(model_factory, X_pool, y_pool, fractions=(0.1, 0.25, 0
 
 
 def multitask_vs_singletask(deep_model, X, y_dict, task_names):
-    """多任务 vs 单任务性能对比."""
+    """Multi-task vs single-task performance comparison."""
     results = {}
     for task in task_names:
         preds = deep_model.predict(X)
@@ -114,7 +114,7 @@ def multitask_vs_singletask(deep_model, X, y_dict, task_names):
 
 
 def run_full_evaluation(results_dict, save=True):
-    """汇总所有评估结果."""
+    """Aggregate all evaluation results."""
     summary = {
         "timestamp": pd.Timestamp.now().isoformat(),
         "models": results_dict,
@@ -122,12 +122,12 @@ def run_full_evaluation(results_dict, save=True):
     if save:
         path = OUTPUTS_DIR / "metrics.json"
         path.write_text(json.dumps(summary, indent=2, default=str))
-        print(f"评估结果已保存: {path}")
+        print(f"Evaluation results saved: {path}")
     return summary
 
 
 if __name__ == "__main__":
-    # 测试
+    # Test
     y_true = np.array(["sedan", "suv", "sedan", "suv", "sedan"])
     y_pred = np.array(["sedan", "sedan", "sedan", "suv", "suv"])
     print(compute_metrics(y_true, y_pred))
