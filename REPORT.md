@@ -1,4 +1,4 @@
-# CarSpec AI: Vehicle Multi-Attribute Intelligent Recognition System
+# CarSpec AI: Vehicle Multi-Attribute Recognition System
 
 **Module 2 Project · Computer Vision**
 
@@ -6,9 +6,9 @@
 
 ## 1. Problem Statement
 
-Vehicle attribute recognition is a core requirement for intelligent transportation, used-car valuation, and vehicle management systems. Given a vehicle exterior photo, the system needs to simultaneously predict multiple vehicle attributes: **vehicle type** (sedan/SUV/MPV/coupe/hatchback), **door count** (2/4/5), and **seat count** (2/5/7).
+Vehicle attribute recognition is a core requirement for transportation systems, used-car valuation, and vehicle management systems. Given a vehicle exterior photo, the system needs to simultaneously predict multiple vehicle attributes: **vehicle type** (sedan/SUV/MPV/coupe/hatchback), **door count** (2/4/5), and **seat count** (2/5/7).
 
-Traditional vehicle recognition systems typically perform only a single task (such as vehicle type classification or brand recognition), ignoring the correlations between attributes. For example, coupe models usually have 2 doors and 2 seats, while MPVs typically have 5 doors and 7 seats. The core hypothesis of this project is: **through multi-task joint learning, leveraging the correlations between attributes can improve overall prediction performance**.
+Traditional vehicle recognition systems typically perform only a single task (such as vehicle type classification or brand recognition), ignoring the correlations between attributes. For example, coupe models usually have 2 doors and 2 seats, while MPVs typically have 5 doors and 7 seats. The core hypothesis of this project is: **through multi-task joint learning, using the correlations between attributes can improve overall prediction performance**.
 
 Furthermore, pure deep learning models lack interpretability, and users cannot understand why the model makes a particular prediction. This project provides better interpretability than pure CNNs by extracting **interpretable visual features** (color histograms, HOG, texture, body proportions, symmetry).
 
@@ -59,9 +59,9 @@ Yang et al. (CVPR 2015) introduced the CompCars dataset and used GoogLeNet for f
 - **Chen et al. (2020)**: Proposed a handcrafted feature-based vehicle type interpretation method
 
 ### 3.4 Novelty of This Project
-Compared with the above work, the innovations of this project are:
+Compared with the above work, the contributions of this project are:
 1. **Multi-task Joint Learning + Interpretable Feature Fusion**: Combines handcrafted interpretable features with deep features, improving performance while providing interpretability
-2. **Attribute Correlation Modeling**: Leverages the correlations between vehicle type, door count, and seat count through multi-task learning
+2. **Attribute Correlation Modeling**: Uses the correlations between vehicle type, door count, and seat count through multi-task learning
 3. **End-to-End Interpretable System**: Not only predicts attributes but also generates natural language explanations (e.g., "dominant color is blue", "aspect ratio 1.2 → tends toward SUV")
 
 ---
@@ -113,7 +113,7 @@ Compared with the above work, the innovations of this project are:
 - **Loss Function**: Sum of CrossEntropyLoss for the three tasks
 - **Optimizer**: Adam, lr=1e-3
 - **Callbacks**: EarlyStopping (patience=5), ReduceLROnPlateau
-- **Rationale**: Multi-task learning leverages attribute correlations, transfer learning reduces data requirements
+- **Rationale**: Multi-task learning uses attribute correlations, transfer learning reduces data requirements
 - **Location**: `scripts/model.py` → `DeepMultiTaskModel` class
 
 ---
@@ -245,7 +245,7 @@ Synthetic data achieves 100% accuracy on the training set, indicating:
 1. **Use Real CompCars Data**: Synthetic data is only for pipeline validation; real data will significantly improve model performance
 2. **GPU Training**: The Deep model requires a GPU environment to train for 20+ epochs
 3. **Feature Engineering Optimization**: Add more shape features (contour curvature, roof lines) to improve the Classical model
-4. **Multi-view Fusion**: Leverage CompCars view annotations to fuse multi-view information
+4. **Multi-view Fusion**: Use CompCars view annotations to fuse multi-view information
 5. **Data Augmentation**: Use random cropping, rotation, and color jittering to improve generalization
 
 ---
@@ -260,7 +260,7 @@ This project successfully implemented the CarSpec AI vehicle multi-attribute rec
 4. **Interactive Web Application**: Flask + responsive UI, supports image upload and real-time prediction
 5. **Complete Engineering Practice**: Modular code, Git PR workflow, Docker deployment
 
-**Core Innovation**: Fuses multi-task learning with interpretable features, leveraging attribute correlations while providing human-understandable prediction explanations.
+**Core Contribution**: Fuses multi-task learning with interpretable features, using attribute correlations while providing human-understandable prediction explanations.
 
 ---
 
@@ -271,7 +271,7 @@ If I had another semester, I would:
 1. **Use the Complete CompCars Dataset** (136k images) for training; the Deep model is expected to achieve 85%+ accuracy
 2. **Implement a ResNet50 Multi-task Model**: Train full ResNet50 on GPU, compare with MobileNetV2
 3. **Attention Mechanism**: Add SE-Block or CBAM to let the model focus on key vehicle regions
-4. **Multi-view Fusion**: Leverage CompCars view annotations for multi-view attribute prediction
+4. **Multi-view Fusion**: Use CompCars view annotations for multi-view attribute prediction
 5. **Enhanced Interpretability**: Implement Grad-CAM heatmaps to visualize CNN attention regions
 6. **Real-time Inference Optimization**: Use TensorRT or ONNX to optimize inference speed
 7. **Mobile Deployment**: Develop a React Native or Flutter mobile app
@@ -283,9 +283,9 @@ If I had another semester, I would:
 ### Commercial Viability Assessment
 
 **Applicable Scenarios**:
-- ✅ Used-car valuation platforms: Automatically identify vehicle attributes to assist pricing
-- ✅ Vehicle management systems: Quickly enter vehicle information
-- ✅ Insurance industry: Vehicle information verification
+- Used-car valuation platforms: Automatically identify vehicle attributes to assist pricing
+- Vehicle management systems: Quickly enter vehicle information
+- Insurance industry: Vehicle information verification
 
 **Advantages**:
 - Multi-task learning reduces deployment costs (one model replaces three)
