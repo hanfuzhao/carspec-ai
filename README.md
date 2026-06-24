@@ -1,6 +1,5 @@
 ---
 title: CarSpec AI
-emoji: 🚗
 colorFrom: blue
 colorTo: yellow
 sdk: docker
@@ -8,7 +7,7 @@ app_port: 7860
 pinned: false
 ---
 
-# CarSpec AI — Vehicle Multi-Attribute Intelligent Recognition System
+# CarSpec AI — Vehicle Multi-Attribute Recognition System
 
 > Module 2 Project · Computer Vision · Based on the CompCars Dataset
 
@@ -16,9 +15,9 @@ pinned: false
 
 CarSpec AI is a computer vision-based vehicle multi-attribute recognition system. Upload a vehicle exterior photo, and the system simultaneously predicts three attributes: **vehicle type**, **door count**, and **seat count**, and provides interpretable visual feature analysis.
 
-## Core Innovations
+## Core Approach
 
-1. **Multi-task Joint Learning**: MobileNetV2 shared backbone + three classification heads, leveraging task correlations to improve performance
+1. **Multi-task Joint Learning**: MobileNetV2 shared backbone + three classification heads, using task correlations to improve performance
 2. **Interpretable Visual Features**: Extract 50+ handcrafted features (color histogram, HOG, texture, body proportions, symmetry), providing better interpretability than pure CNNs
 3. **Three-Model Comparison**: Naive baseline / Classical ML (Random Forest) / Deep Learning (MobileNetV2 multi-task)
 
