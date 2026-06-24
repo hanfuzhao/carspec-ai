@@ -7,10 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# 先安装 CPU 版 PyTorch（更小更快）
-RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
-
-# 其余 Python 依赖
+# Python 依赖（不含 torch，减小镜像体积）
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
