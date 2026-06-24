@@ -56,7 +56,6 @@ def evaluate_model(model, X, y, task_name, classes, model_name):
     """Evaluate a single model and save results."""
     y_pred = model.predict(X)
     metrics = compute_metrics(y, y_pred, classes)
-    # Confusion matrix
     plot_confusion_matrix(
         y, y_pred, classes,
         f"{model_name} - {task_name} (Acc={metrics['accuracy']:.3f})",
@@ -79,7 +78,6 @@ def error_analysis(model, X, y, df_meta, task_name, classes, model_name, top_k=5
                 "pred_label": str(pred),
                 "model_id": str(row.get("model_id", "")) if hasattr(row, "get") else "",
             })
-    # Take first 5
     return errors[:top_k]
 
 
@@ -127,7 +125,6 @@ def run_full_evaluation(results_dict, save=True):
 
 
 if __name__ == "__main__":
-    # Test
     y_true = np.array(["sedan", "suv", "sedan", "suv", "sedan"])
     y_pred = np.array(["sedan", "sedan", "sedan", "suv", "suv"])
     print(compute_metrics(y_true, y_pred))
