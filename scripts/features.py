@@ -64,7 +64,6 @@ def extract_hog_features(img, orientations=8, pixels_per_cell=(32, 32)):
             block_norm="L2-Hys",
             feature_vector=True,
         )
-        # Dimensionality reduction: take statistics
         return np.array([features.mean(), features.std(), features.max()], dtype=np.float32)
     except ImportError:
         return np.zeros(3, dtype=np.float32)
@@ -90,13 +89,13 @@ def extract_texture_features(img):
 def extract_all_features(img):
     """Extract all interpretable features and concatenate into a vector."""
     return np.concatenate([
-        extract_color_histogram(img, bins=8),       # 24 dims
-        extract_aspect_ratio(img),                   # 1 dim
-        extract_edge_density(img),                   # 2 dims
-        extract_body_proportion(img),                # 3 dims
-        extract_symmetry(img),                       # 1 dim
-        extract_hog_features(img),                   # 3 dims
-        extract_texture_features(img),               # 16 dims
+        extract_color_histogram(img, bins=8),
+        extract_aspect_ratio(img),
+        extract_edge_density(img),
+        extract_body_proportion(img),
+        extract_symmetry(img),
+        extract_hog_features(img),
+        extract_texture_features(img),
     ])
 
 
@@ -117,31 +116,26 @@ FEATURE_DIM = len(FEATURE_NAMES)
 def feature_importance_explanation(features, top_k=5):
     """Generate interpretable explanations based on feature values."""
     explanations = []
-    # Color features
     h_hist = features[0:8]
     dominant_hue = int(np.argmax(h_hist))
     hue_names = ["Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink"]
     explanations.append(f"Dominant color: {hue_names[dominant_hue]} family (proportion {h_hist[dominant_hue]:.1%})")
-    # Aspect ratio
     ar = features[24]
     if ar > 1.2:
         explanations.append(f"Aspect ratio {ar:.2f} -> leans toward SUV/MPV (wider)")
     else:
         explanations.append(f"Aspect ratio {ar:.2f} -> leans toward sedan/coupe (lower)")
-    # Edge density
     edge_mean = features[25]
     if edge_mean > 0.1:
         explanations.append(f"High edge density ({edge_mean:.3f}) -> complex body lines")
     else:
         explanations.append(f"Low edge density ({edge_mean:.3f}) -> simple body lines")
-    # Symmetry
     sym = features[28]
     explanations.append(f"Left-right symmetry error {sym:.4f} -> {'symmetric (front view)' if sym < 0.05 else 'asymmetric (side view)'}")
     return explanations[:top_k]
 
 
 if __name__ == "__main__":
-    # Test
     dummy = np.random.rand(224, 224, 3).astype(np.float32)
     feats = extract_all_features(dummy)
     print(f"Feature dimension: {len(feats)}")
