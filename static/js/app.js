@@ -1,4 +1,3 @@
-// CarSpec AI — Frontend Interaction Logic
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const preview = document.getElementById('preview');
@@ -9,7 +8,6 @@ const resultsSection = document.getElementById('results');
 
 let selectedFile = null;
 
-// Upload Area Interaction
 uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -41,7 +39,6 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
-// Predict
 predictBtn.addEventListener('click', async () => {
     if (!selectedFile) return;
     predictBtn.disabled = true;
@@ -64,15 +61,12 @@ predictBtn.addEventListener('click', async () => {
 
 function displayResults(data) {
     resultsSection.style.display = 'block';
-    // Classical Results
     const classical = data.classical || {};
     const deep = data.deep || {};
-    // Show Deep first, fallback to Classical
     const source = deep || classical;
     if (source.car_type) updateCard('CarType', source.car_type);
     if (source.door_count) updateCard('DoorCount', source.door_count);
     if (source.seat_count) updateCard('SeatCount', source.seat_count);
-    // Interpretable Explanations
     const expList = document.getElementById('explanationList');
     expList.innerHTML = '';
     (data.explanations || []).forEach(exp => {
@@ -81,7 +75,6 @@ function displayResults(data) {
         item.innerHTML = `<span class="icon">▸</span><span>${exp}</span>`;
         expList.appendChild(item);
     });
-    // Model Comparison
     const compGrid = document.getElementById('comparisonGrid');
     compGrid.innerHTML = `
         <div class="comparison-col">
