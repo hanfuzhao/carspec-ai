@@ -7,8 +7,7 @@ data/outputs/
 !data/processed/.gitkeep
 !data/outputs/.gitkeep
 
-# 模型
-models/*.pkl
+# 模型（允许 .pkl 文件，均 <1MB）
 models/*.h5
 !models/.gitkeep
 
