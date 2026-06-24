@@ -1,4 +1,3 @@
-/* CarSpec AI — Production-Grade UI Styles */
 :root {
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
@@ -25,7 +24,6 @@ body {
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-/* Navbar */
 .navbar {
     position: sticky; top: 0; z-index: 100;
     background: rgba(255,255,255,0.95);
@@ -43,7 +41,6 @@ body {
 .nav-link { color: var(--text-light); text-decoration: none; font-weight: 500; transition: color 0.2s; }
 .nav-link:hover { color: var(--primary); }
 
-/* Hero */
 .hero {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
     color: white; padding: 80px 0 100px; text-align: center;
@@ -55,7 +52,6 @@ body {
 .stat-value { font-size: 32px; font-weight: 800; }
 .stat-label { font-size: 14px; opacity: 0.8; margin-top: 4px; }
 
-/* Upload */
 .upload-section { padding: 60px 0; margin-top: -40px; }
 .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
 .section-desc { text-align: center; color: var(--text-light); margin-bottom: 32px; }
@@ -92,7 +88,6 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Results */
 .results-section { padding: 60px 0; }
 .results-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -114,7 +109,6 @@ body {
 .prob-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .prob-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.5s; }
 
-/* Explanation */
 .explanation-section, .model-comparison {
     background: var(--card-bg); border-radius: var(--radius);
     padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow);
@@ -132,7 +126,6 @@ body {
 .comparison-col h4 { margin-bottom: 12px; color: var(--text-light); }
 .comparison-result { font-size: 18px; font-weight: 600; }
 
-/* How it works */
 .how-section { padding: 80px 0; background: white; }
 .steps-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -151,7 +144,6 @@ body {
 .step-card h3 { font-size: 18px; margin-bottom: 8px; }
 .step-card p { color: var(--text-light); font-size: 14px; }
 
-/* About */
 .about-section { padding: 80px 0; }
 .about-text { color: var(--text-light); max-width: 700px; margin: 0 auto 32px; text-align: center; }
 .tech-stack { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
@@ -160,7 +152,6 @@ body {
     border-radius: 20px; font-size: 14px; color: var(--text-light);
 }
 
-/* Footer */
 .footer { padding: 32px 0; text-align: center; color: var(--text-light); border-top: 1px solid var(--border); }
 
 @media (max-width: 768px) {
