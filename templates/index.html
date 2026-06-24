@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarSpec AI — 车辆多属性智能识别</title>
+    <title>CarSpec AI — Vehicle Multi-Attribute Recognition</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -15,29 +15,29 @@
                 <span class="logo-text">CarSpec <span class="accent">AI</span></span>
             </div>
             <div class="nav-links">
-                <a href="#upload" class="nav-link">识别</a>
-                <a href="#how" class="nav-link">原理</a>
-                <a href="#about" class="nav-link">关于</a>
+                <a href="#upload" class="nav-link">Recognize</a>
+                <a href="#how" class="nav-link">How It Works</a>
+                <a href="#about" class="nav-link">About</a>
             </div>
         </div>
     </nav>
 
     <header class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">车辆多属性<span class="accent">智能识别</span></h1>
-            <p class="hero-subtitle">上传一张车辆外观照片，AI 同时识别车型类型、门数、座位数，并提供可解释的视觉特征分析</p>
+            <h1 class="hero-title">Vehicle Multi-Attribute <span class="accent">Recognition</span></h1>
+            <p class="hero-subtitle">Upload a vehicle exterior photo, AI simultaneously recognizes car type, door count, seat count, and provides interpretable visual feature analysis</p>
             <div class="hero-stats">
                 <div class="stat">
                     <div class="stat-value">3</div>
-                    <div class="stat-label">预测属性</div>
+                    <div class="stat-label">Predicted Attributes</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">ResNet50</div>
-                    <div class="stat-label">深度模型</div>
+                    <div class="stat-label">Deep Model</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">50+</div>
-                    <div class="stat-label">可解释特征</div>
+                    <div class="stat-label">Interpretable Features</div>
                 </div>
             </div>
         </div>
@@ -45,59 +45,59 @@
 
     <section id="upload" class="upload-section">
         <div class="container">
-            <h2 class="section-title">上传车辆图片</h2>
-            <p class="section-desc">支持 JPG/PNG，建议上传侧面或正面视角的清晰车辆照片</p>
+            <h2 class="section-title">Upload Vehicle Image</h2>
+            <p class="section-desc">Supports JPG/PNG, recommend uploading clear vehicle photos from side or front view</p>
             <div class="upload-area" id="uploadArea">
                 <div class="upload-content" id="uploadContent">
                     <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                     </svg>
-                    <p class="upload-text">拖拽图片到此处，或 <span class="upload-link">点击选择</span></p>
-                    <p class="upload-hint">JPG, PNG · 最大 10MB</p>
+                    <p class="upload-text">Drag and drop image here, or <span class="upload-link">click to select</span></p>
+                    <p class="upload-hint">JPG, PNG · Max 10MB</p>
                 </div>
-                <img id="preview" class="preview-img" style="display:none;" alt="预览">
+                <img id="preview" class="preview-img" style="display:none;" alt="Preview">
                 <input type="file" id="fileInput" accept="image/*" hidden>
             </div>
-            <button id="predictBtn" class="btn-primary" disabled>开始识别</button>
+            <button id="predictBtn" class="btn-primary" disabled>Start Recognition</button>
             <div id="loading" class="loading" style="display:none;">
                 <div class="spinner"></div>
-                <p>AI 正在分析图片...</p>
+                <p>AI is analyzing the image...</p>
             </div>
         </div>
     </section>
 
     <section id="results" class="results-section" style="display:none;">
         <div class="container">
-            <h2 class="section-title">识别结果</h2>
+            <h2 class="section-title">Recognition Results</h2>
             <div class="results-grid">
                 <div class="result-card" id="cardCarType">
                     <div class="card-icon">🚙</div>
-                    <div class="card-label">车型类型</div>
+                    <div class="card-label">Car Type</div>
                     <div class="card-value" id="resCarType">—</div>
                     <div class="card-confidence" id="confCarType"></div>
                     <div class="card-probs" id="probsCarType"></div>
                 </div>
                 <div class="result-card" id="cardDoorCount">
                     <div class="card-icon">🚪</div>
-                    <div class="card-label">门数</div>
+                    <div class="card-label">Door Count</div>
                     <div class="card-value" id="resDoorCount">—</div>
                     <div class="card-confidence" id="confDoorCount"></div>
                     <div class="card-probs" id="probsDoorCount"></div>
                 </div>
                 <div class="result-card" id="cardSeatCount">
                     <div class="card-icon">💺</div>
-                    <div class="card-label">座位数</div>
+                    <div class="card-label">Seat Count</div>
                     <div class="card-value" id="resSeatCount">—</div>
                     <div class="card-confidence" id="confSeatCount"></div>
                     <div class="card-probs" id="probsSeatCount"></div>
                 </div>
             </div>
             <div class="explanation-section">
-                <h3 class="subsection-title">🔍 可解释特征分析</h3>
+                <h3 class="subsection-title">🔍 Interpretable Feature Analysis</h3>
                 <div class="explanation-list" id="explanationList"></div>
             </div>
             <div class="model-comparison">
-                <h3 class="subsection-title">📊 模型对比</h3>
+                <h3 class="subsection-title">📊 Model Comparison</h3>
                 <div class="comparison-grid" id="comparisonGrid"></div>
             </div>
         </div>
@@ -105,27 +105,27 @@
 
     <section id="how" class="how-section">
         <div class="container">
-            <h2 class="section-title">工作原理</h2>
+            <h2 class="section-title">How It Works</h2>
             <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <h3>图片上传</h3>
-                    <p>用户上传车辆外观照片，系统预处理为 224×224 标准尺寸</p>
+                    <h3>Image Upload</h3>
+                    <p>User uploads vehicle exterior photo, system preprocesses to 224×224 standard size</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <h3>特征提取</h3>
-                    <p>提取 50+ 可解释视觉特征：颜色直方图、HOG、纹理、车身比例、对称性</p>
+                    <h3>Feature Extraction</h3>
+                    <p>Extract 50+ interpretable visual features: color histogram, HOG, texture, body proportions, symmetry</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h3>多模型预测</h3>
-                    <p>Classical ML（随机森林）和 Deep Learning（ResNet50 多任务）并行预测</p>
+                    <h3>Multi-Model Prediction</h3>
+                    <p>Classical ML (Random Forest) and Deep Learning (ResNet50 multi-task) predict in parallel</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">4</div>
-                    <h3>可解释输出</h3>
-                    <p>返回预测结果、置信度、概率分布和视觉特征解释</p>
+                    <h3>Interpretable Output</h3>
+                    <p>Returns prediction results, confidence, probability distribution, and visual feature explanations</p>
                 </div>
             </div>
         </div>
@@ -133,15 +133,15 @@
 
     <section id="about" class="about-section">
         <div class="container">
-            <h2 class="section-title">关于项目</h2>
-            <p class="about-text">CarSpec AI 是一个基于计算机视觉的车辆多属性识别系统，使用 CompCars 数据集（13万+图片）训练。
-            项目实现了三种建模方法：Naive 基线、Classical ML（随机森林+可解释特征）、Deep Learning（ResNet50 多任务学习），
-            并通过多任务联合学习和可解释视觉特征提供比单任务模型更好的性能和可解释性。</p>
+            <h2 class="section-title">About the Project</h2>
+            <p class="about-text">CarSpec AI is a computer vision-based vehicle multi-attribute recognition system, trained using the CompCars dataset (130k+ images).
+            The project implements three modeling approaches: Naive baseline, Classical ML (Random Forest + interpretable features), Deep Learning (ResNet50 multi-task learning),
+            and provides better performance and interpretability than single-task models through multi-task joint learning and interpretable visual features.</p>
             <div class="tech-stack">
                 <span class="tech-tag">ResNet50</span>
-                <span class="tech-tag">随机森林</span>
-                <span class="tech-tag">多任务学习</span>
-                <span class="tech-tag">可解释AI</span>
+                <span class="tech-tag">Random Forest</span>
+                <span class="tech-tag">Multi-Task Learning</span>
+                <span class="tech-tag">Interpretable AI</span>
                 <span class="tech-tag">Flask</span>
                 <span class="tech-tag">CompCars</span>
             </div>

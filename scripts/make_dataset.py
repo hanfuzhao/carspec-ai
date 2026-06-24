@@ -1,4 +1,4 @@
-"""下载并准备 CompCars 数据集."""
+"""Download and prepare the CompCars dataset."""
 import os
 import json
 from pathlib import Path
@@ -6,47 +6,47 @@ from scripts.data import RAW_DIR, METADATA_PATH, CAR_TYPES, DOOR_COUNTS, SEAT_CO
 
 
 def check_data_exists() -> bool:
-    """检查数据是否已存在."""
+    """Check if data already exists."""
     return (RAW_DIR / "part" / "attr.json").exists() and (RAW_DIR / "image").exists()
 
 
 def print_instructions():
-    """打印手动下载说明."""
+    """Print manual download instructions."""
     print("""
 ================================================================
-  CompCars 数据集下载说明
+  CompCars Dataset Download Instructions
 ================================================================
 
-CompCars 数据集需要手动下载（非商业研究用途）。
+The CompCars dataset needs to be downloaded manually (for non-commercial research use).
 
-1. 访问官网: http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/
-2. 下载以下文件:
-   - web_data/image.zip (整车图片)
-   - web_data/part.zip (属性数据)
-3. 解压到以下目录结构:
+1. Visit the official website: http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/
+2. Download the following files:
+   - web_data/image.zip (vehicle images)
+   - web_data/part.zip (attribute data)
+3. Extract to the following directory structure:
 
    data/raw/compcars/
-   ├── image/          <- 解压 image.zip
-   │   ├── 1/          <- 车型ID文件夹
+   ├── image/          <- Extract image.zip
+   │   ├── 1/          <- Model ID folder
    │   │   ├── 001.jpg
    │   │   └── ...
    │   └── ...
-   └── part/           <- 解压 part.zip
+   └── part/           <- Extract part.zip
        ├── attr.json
        └── train_test_split
 
-4. 运行验证:
+4. Run validation:
    python -m scripts.data
 
-环境变量:
-   MAX_SAMPLES=5000  # 限制样本数（用于快速测试）
+Environment variables:
+   MAX_SAMPLES=5000  # Limit the number of samples (for quick testing)
 
 ================================================================
 """)
 
 
 def create_metadata():
-    """创建数据集元数据."""
+    """Create dataset metadata."""
     from scripts.data import load_image_labels
     df = load_image_labels()
     metadata = {
@@ -68,10 +68,10 @@ def create_metadata():
     }
     METADATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     METADATA_PATH.write_text(json.dumps(metadata, indent=2, default=str))
-    print(f"元数据已保存: {METADATA_PATH}")
-    print(f"总图片数: {len(df):,}")
+    print(f"Metadata saved: {METADATA_PATH}")
+    print(f"Total images: {len(df):,}")
     for task, counts in metadata["class_counts"].items():
-        print(f"\n{task} 分布:")
+        print(f"\n{task} distribution:")
         for k, v in counts.items():
             print(f"  {k}: {v:,}")
 
@@ -79,7 +79,7 @@ def create_metadata():
 def main():
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     if check_data_exists():
-        print("数据已存在，生成元数据...")
+        print("Data already exists, generating metadata...")
         create_metadata()
     else:
         print_instructions()

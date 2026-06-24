@@ -1,20 +1,20 @@
-## PR 描述模板
+## Pull Request Template
 
-### 变更类型
-- [ ] 新功能 (feature)
-- [ ] Bug 修复 (bugfix)
-- [ ] 重构 (refactor)
-- [ ] 文档 (docs)
-- [ ] 实验 (experiment)
+### Change type
+- [ ] New feature (feature)
+- [ ] Bug fix (bugfix)
+- [ ] Refactor (refactor)
+- [ ] Documentation (docs)
+- [ ] Experiment (experiment)
 
-### 变更内容
-<!-- 简述本次 PR 做了什么 -->
+### Changes
+<!-- Briefly describe what this PR does -->
 
-### 动机
-<!-- 为什么做这个变更 -->
+### Motivation
+<!-- Why this change was made -->
 
-### 测试
-<!-- 如何验证 -->
+### Testing
+<!-- How to verify -->
 
-### 关联 Issue
+### Related Issue
 <!-- Closes #xxx -->

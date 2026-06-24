@@ -1,4 +1,4 @@
-# CarSpec AI 依赖（轻量部署，不含 torch/scikit-image）
+# CarSpec AI dependencies (lightweight deployment, without torch/scikit-image)
 numpy>=1.21.0
 pandas>=1.3.0
 Pillow>=8.0.0

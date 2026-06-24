@@ -1,8 +1,8 @@
-"""CarSpec AI — 车辆多属性智能识别系统.
+"""CarSpec AI — Vehicle Multi-Attribute Intelligent Recognition System.
 
-Flask Web 应用：上传车辆图片 → 预测车型类型/门数/座位数 + 可解释特征说明.
+Flask Web App: Upload vehicle image -> Predict car type/door count/seat count + Interpretable feature explanation.
 
-部署：HuggingFace Spaces / Docker
+Deployment: HuggingFace Spaces / Docker
 """
 import os
 import io
@@ -18,14 +18,14 @@ from scripts.model import load_trained_model, DeepMultiTaskModel, MODELS_DIR
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# 全局模型缓存
+# Global model cache
 MODELS = {}
 
 MODEL_REPO = "HanfuZhao781/carspec-models"
 
 
 def download_models():
-    """从 HuggingFace Hub 下载模型文件."""
+    """Download model files from HuggingFace Hub."""
     try:
         from huggingface_hub import snapshot_download
         MODELS_DIR.mkdir(parents=True, exist_ok=True)
@@ -35,43 +35,43 @@ def download_models():
             local_dir=str(MODELS_DIR),
             local_dir_use_symlinks=False,
         )
-        print("模型下载完成")
+        print("Model download complete")
     except Exception as e:
-        print(f"模型下载失败: {e}")
+        print(f"Model download failed: {e}")
 
 
 def load_models():
-    """加载所有已训练模型."""
-    print("加载模型...")
-    # 如果模型文件不存在，从 Hub 下载
+    """Load all trained models."""
+    print("Loading models...")
+    # If model files do not exist, download from Hub
     if not (MODELS_DIR / "classical_car_type.pkl").exists():
         download_models()
-    # Classical 模型
+    # Classical models
     for task in ["car_type", "door_count", "seat_count"]:
         model = load_trained_model("classical", task=task)
         if model is not None:
             MODELS[f"classical_{task}"] = model
-            print(f"  classical_{task} 已加载")
-    # Deep 模型（需要 torch，部署时可能不可用）
+            print(f"  classical_{task} loaded")
+    # Deep model (requires torch, may not be available at deployment)
     deep_path = MODELS_DIR / "deep_multitask.pt"
     if deep_path.exists():
         try:
             deep_model = DeepMultiTaskModel()
             deep_model.load(str(deep_path))
             MODELS["deep"] = deep_model
-            print("  deep_multitask 已加载")
+            print("  deep_multitask loaded")
         except Exception as e:
-            print(f"  deep 模型加载失败: {e}")
-    # Naive 基线
+            print(f"  deep model load failed: {e}")
+    # Naive baseline
     for task in ["car_type", "door_count", "seat_count"]:
         model = load_trained_model("naive", task=task)
         if model is not None:
             MODELS[f"naive_{task}"] = model
-    print(f"已加载 {len(MODELS)} 个模型")
+    print(f"Loaded {len(MODELS)} models")
 
 
 def preprocess_image(file_storage, size=IMG_SIZE):
-    """预处理上传的图片."""
+    """Preprocess uploaded image."""
     img = Image.open(file_storage).convert("RGB")
     img_resized = img.resize((size, size), Image.BILINEAR)
     arr = np.array(img_resized, dtype=np.float32) / 255.0
@@ -79,7 +79,7 @@ def preprocess_image(file_storage, size=IMG_SIZE):
 
 
 def predict_with_classical(features):
-    """使用 Classical 模型预测."""
+    """Predict using Classical model."""
     results = {}
     for task, classes in [("car_type", CAR_TYPES), ("door_count", DOOR_COUNTS), ("seat_count", SEAT_COUNTS)]:
         key = f"classical_{task}"
@@ -96,7 +96,7 @@ def predict_with_classical(features):
 
 
 def predict_with_deep(img_array):
-    """使用 Deep 模型预测."""
+    """Predict using Deep model."""
     if "deep" not in MODELS:
         return None
     model = MODELS["deep"]
@@ -116,34 +116,34 @@ def predict_with_deep(img_array):
                 }
         return results
     except Exception as e:
-        print(f"Deep 预测失败: {e}")
+        print(f"Deep prediction failed: {e}")
         return None
 
 
 @app.route("/")
 def index():
-    """主页."""
+    """Home page."""
     return render_template("index.html")
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """预测接口."""
+    """Prediction endpoint."""
     if "image" not in request.files:
-        return jsonify({"error": "未上传图片"}), 400
+        return jsonify({"error": "No image uploaded"}), 400
     file = request.files["image"]
     if file.filename == "":
-        return jsonify({"error": "未选择文件"}), 400
+        return jsonify({"error": "No file selected"}), 400
     try:
         img_array, original_img = preprocess_image(file)
         features = extract_all_features(img_array)
-        # Classical 预测
+        # Classical prediction
         classical_results = predict_with_classical(features)
-        # Deep 预测
+        # Deep prediction
         deep_results = predict_with_deep(img_array)
-        # 可解释说明
+        # Interpretable explanation
         explanations = feature_importance_explanation(features)
-        # 返回结果
+        # Return results
         response = {
             "success": True,
             "classical": classical_results,
@@ -158,13 +158,13 @@ def predict():
 
 @app.route("/health")
 def health():
-    """健康检查."""
+    """Health check."""
     return jsonify({"status": "ok", "models_loaded": len(MODELS)})
 
 
 @app.route("/models")
 def models_info():
-    """模型信息."""
+    """Model information."""
     return jsonify({
         "loaded": list(MODELS.keys()),
         "tasks": {
