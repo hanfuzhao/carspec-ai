@@ -23,9 +23,6 @@ MODELS_DIR = Path("models")
 SEED = 42
 
 
-# ============================================================
-# 1. Naive baseline model
-# ============================================================
 class NaiveBaseline:
     """Majority class baseline: always predicts the most frequent class in the training set."""
 
@@ -62,9 +59,6 @@ class NaiveBaseline:
         return self
 
 
-# ============================================================
-# 2. Classical ML model
-# ============================================================
 class ClassicalModel:
     """Classical ML: interpretable visual features + Random Forest."""
 
@@ -121,9 +115,6 @@ class ClassicalModel:
         return self
 
 
-# ============================================================
-# 3. Deep Learning multi-task model (PyTorch)
-# ============================================================
 class DeepMultiTaskModel:
     """ResNet50 transfer learning + multi-task classification head (PyTorch).
 
@@ -218,7 +209,6 @@ class DeepMultiTaskModel:
                 total_loss += loss.item()
             avg_loss = total_loss / max(steps_per_epoch or 100, 1)
             history["train_loss"].append(avg_loss)
-            # Validation
             self.model.eval()
             correct, total = 0, 0
             with torch.no_grad():
@@ -317,9 +307,6 @@ def _torch_cuda():
         return False
 
 
-# ============================================================
-# Factory function
-# ============================================================
 def get_model(model_name: str, task: str = "car_type", **kwargs):
     if model_name == "naive":
         return NaiveBaseline(task=task)
