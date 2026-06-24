@@ -1,4 +1,4 @@
-"""CarSpec AI — Vehicle Multi-Attribute Intelligent Recognition System.
+"""CarSpec AI — Vehicle Multi-Attribute Recognition System.
 
 Flask Web App: Upload vehicle image -> Predict car type/door count/seat count + Interpretable feature explanation.
 
@@ -18,7 +18,6 @@ from scripts.model import load_trained_model, DeepMultiTaskModel, MODELS_DIR
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# Global model cache
 MODELS = {}
 
 MODEL_REPO = "HanfuZhao781/carspec-models"
@@ -43,16 +42,13 @@ def download_models():
 def load_models():
     """Load all trained models."""
     print("Loading models...")
-    # If model files do not exist, download from Hub
     if not (MODELS_DIR / "classical_car_type.pkl").exists():
         download_models()
-    # Classical models
     for task in ["car_type", "door_count", "seat_count"]:
         model = load_trained_model("classical", task=task)
         if model is not None:
             MODELS[f"classical_{task}"] = model
             print(f"  classical_{task} loaded")
-    # Deep model (requires torch, may not be available at deployment)
     deep_path = MODELS_DIR / "deep_multitask.pt"
     if deep_path.exists():
         try:
@@ -62,7 +58,6 @@ def load_models():
             print("  deep_multitask loaded")
         except Exception as e:
             print(f"  deep model load failed: {e}")
-    # Naive baseline
     for task in ["car_type", "door_count", "seat_count"]:
         model = load_trained_model("naive", task=task)
         if model is not None:
@@ -137,13 +132,9 @@ def predict():
     try:
         img_array, original_img = preprocess_image(file)
         features = extract_all_features(img_array)
-        # Classical prediction
         classical_results = predict_with_classical(features)
-        # Deep prediction
         deep_results = predict_with_deep(img_array)
-        # Interpretable explanation
         explanations = feature_importance_explanation(features)
-        # Return results
         response = {
             "success": True,
             "classical": classical_results,
