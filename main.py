@@ -21,17 +21,38 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 # 全局模型缓存
 MODELS = {}
 
+MODEL_REPO = "HanfuZhao781/carspec-models"
+
+
+def download_models():
+    """从 HuggingFace Hub 下载模型文件."""
+    try:
+        from huggingface_hub import snapshot_download
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        snapshot_download(
+            repo_id=MODEL_REPO,
+            repo_type="model",
+            local_dir=str(MODELS_DIR),
+            local_dir_use_symlinks=False,
+        )
+        print("模型下载完成")
+    except Exception as e:
+        print(f"模型下载失败: {e}")
+
 
 def load_models():
     """加载所有已训练模型."""
     print("加载模型...")
+    # 如果模型文件不存在，从 Hub 下载
+    if not (MODELS_DIR / "classical_car_type.pkl").exists():
+        download_models()
     # Classical 模型
     for task in ["car_type", "door_count", "seat_count"]:
         model = load_trained_model("classical", task=task)
         if model is not None:
             MODELS[f"classical_{task}"] = model
             print(f"  classical_{task} 已加载")
-    # Deep 模型
+    # Deep 模型（需要 torch，部署时可能不可用）
     deep_path = MODELS_DIR / "deep_multitask.pt"
     if deep_path.exists():
         try:

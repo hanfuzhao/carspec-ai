@@ -7,7 +7,9 @@ data/outputs/
 !data/processed/.gitkeep
 !data/outputs/.gitkeep
 
-# 模型（允许 .pkl 文件，均 <1MB）
+# 模型（部署时从 HuggingFace Hub 下载）
+models/*.pkl
+models/*.pt
 models/*.h5
 !models/.gitkeep
 
