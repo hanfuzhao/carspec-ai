@@ -1,0 +1,55 @@
+{
+  "n_total": 6000,
+  "n_models": 100,
+  "tasks": {
+    "car_type": {
+      "classes": [
+        "sedan",
+        "suv",
+        "mpv",
+        "coupe",
+        "hatchback"
+      ],
+      "counts": {
+        "sedan": 1200,
+        "suv": 1380,
+        "mpv": 1200,
+        "coupe": 1020,
+        "hatchback": 1200
+      },
+      "majority_class": "suv",
+      "majority_ratio": 0.23,
+      "n_classes": 5
+    },
+    "door_count": {
+      "classes": [
+        "2",
+        "4",
+        "5"
+      ],
+      "counts": {
+        "2": 0,
+        "4": 0,
+        "5": 0
+      },
+      "majority_class": "2",
+      "majority_ratio": 0.0,
+      "n_classes": 3
+    },
+    "seat_count": {
+      "classes": [
+        "2",
+        "5",
+        "7"
+      ],
+      "counts": {
+        "2": 0,
+        "5": 0,
+        "7": 0
+      },
+      "majority_class": "2",
+      "majority_ratio": 0.0,
+      "n_classes": 3
+    }
+  }
+}
