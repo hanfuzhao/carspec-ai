@@ -17,10 +17,17 @@ from scripts.features import extract_all_features, feature_importance_explanatio
 from scripts.model import load_trained_model, DeepMultiTaskModel, MODELS_DIR
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
 MODELS = {}
 
 MODEL_REPO = "HanfuZhao781/carspec-models"
+
+TASK_CLASSES = {
+    "car_type": CAR_TYPES,
+    "door_count": DOOR_COUNTS,
+    "seat_count": SEAT_COUNTS,
+}
 
 
 def download_models():
@@ -76,7 +83,7 @@ def preprocess_image(file_storage, size=IMG_SIZE):
 def predict_with_classical(features):
     """Predict using Classical model."""
     results = {}
-    for task, classes in [("car_type", CAR_TYPES), ("door_count", DOOR_COUNTS), ("seat_count", SEAT_COUNTS)]:
+    for task, classes in TASK_CLASSES.items():
         key = f"classical_{task}"
         if key in MODELS:
             model = MODELS[key]
@@ -99,8 +106,7 @@ def predict_with_deep(img_array):
     try:
         preds = model.predict_proba(X)
         results = {}
-        task_classes = {"car_type": CAR_TYPES, "door_count": DOOR_COUNTS, "seat_count": SEAT_COUNTS}
-        for task, classes in task_classes.items():
+        for task, classes in TASK_CLASSES.items():
             if task in preds:
                 proba = preds[task][0]
                 pred_idx = int(np.argmax(proba))
@@ -115,6 +121,76 @@ def predict_with_deep(img_array):
         return None
 
 
+def build_top_k(classical_results, deep_results, k=5):
+    """Build top-k predictions list (from primary model, by confidence)."""
+    source = deep_results if deep_results else classical_results
+    if not source or "car_type" not in source:
+        return []
+    probs = source["car_type"].get("probabilities", {})
+    sorted_probs = sorted(probs.items(), key=lambda x: -x[1])[:k]
+    return [{"label": lbl, "confidence": float(conf)} for lbl, conf in sorted_probs]
+
+
+def build_feedback(primary_results):
+    """Build confidence-based feedback message and level."""
+    if not primary_results or "car_type" not in primary_results:
+        return {"level": "info", "message": "No prediction available", "color": "gray"}
+    conf = primary_results["car_type"].get("confidence", 0.0)
+    pred = primary_results["car_type"].get("prediction", "unknown")
+    if conf >= 0.75:
+        return {
+            "level": "success",
+            "message": f"High confidence prediction: {pred} ({conf*100:.1f}%). Model is confident in this result.",
+            "color": "green",
+        }
+    if conf >= 0.5:
+        return {
+            "level": "warning",
+            "message": f"Moderate confidence prediction: {pred} ({conf*100:.1f}%). Consider verifying with additional context.",
+            "color": "orange",
+        }
+    return {
+        "level": "error",
+        "message": f"Low confidence prediction: {pred} ({conf*100:.1f}%). Image may be ambiguous or out-of-distribution.",
+        "color": "red",
+    }
+
+
+def validate_upload(file):
+    """Validate uploaded file. Returns (ok, error_message, status_code)."""
+    if not file or file.filename == "":
+        return False, "No file selected", 400
+    if not file.filename.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp")):
+        return False, "Unsupported file format. Please upload JPG, PNG, BMP, or WEBP image.", 400
+    try:
+        img = Image.open(file)
+        img.verify()
+        file.stream.seek(0)
+    except Exception:
+        return False, "Invalid image file. Please upload a valid image.", 400
+    return True, None, 200
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    """Handle file size > 16MB."""
+    return jsonify({
+        "success": False,
+        "error": "File too large. Maximum allowed size is 16MB.",
+        "code": 413,
+    }), 413
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    """Handle bad request."""
+    return jsonify({
+        "success": False,
+        "error": "Bad request. Please check the uploaded file.",
+        "code": 400,
+    }), 400
+
+
 @app.route("/")
 def index():
     """Home page."""
@@ -123,20 +199,41 @@ def index():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """Prediction endpoint."""
+    """Prediction endpoint.
+
+    Returns JSON with:
+    - prediction: primary predicted label (car_type)
+    - confidence: confidence of primary prediction
+    - top_k: top-k predictions with confidences
+    - feedback: confidence-based feedback message
+    - classical: per-task classical model results
+    - deep: per-task deep model results (if available)
+    - explanations: interpretable feature explanations
+    - features: raw feature values
+    """
     if "image" not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
+        return jsonify({"success": False, "error": "No image uploaded"}), 400
     file = request.files["image"]
-    if file.filename == "":
-        return jsonify({"error": "No file selected"}), 400
+    ok, err_msg, status = validate_upload(file)
+    if not ok:
+        return jsonify({"success": False, "error": err_msg, "code": status}), status
     try:
         img_array, original_img = preprocess_image(file)
         features = extract_all_features(img_array)
         classical_results = predict_with_classical(features)
         deep_results = predict_with_deep(img_array)
         explanations = feature_importance_explanation(features)
+        primary = deep_results if deep_results else classical_results
+        primary_pred = primary.get("car_type", {}).get("prediction") if primary else None
+        primary_conf = primary.get("car_type", {}).get("confidence", 0.0) if primary else 0.0
+        top_k = build_top_k(classical_results, deep_results, k=5)
+        feedback = build_feedback(primary)
         response = {
             "success": True,
+            "prediction": primary_pred,
+            "confidence": float(primary_conf),
+            "top_k": top_k,
+            "feedback": feedback,
             "classical": classical_results,
             "deep": deep_results,
             "explanations": explanations,
@@ -144,13 +241,17 @@ def predict():
         }
         return jsonify(response)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e), "code": 500}), 500
 
 
 @app.route("/health")
 def health():
     """Health check."""
-    return jsonify({"status": "ok", "models_loaded": len(MODELS)})
+    return jsonify({
+        "status": "ok",
+        "models_loaded": len(MODELS),
+        "loaded_models": list(MODELS.keys()),
+    })
 
 
 @app.route("/models")
@@ -164,6 +265,16 @@ def models_info():
             "seat_count": SEAT_COUNTS,
         },
     })
+
+
+@app.route("/samples")
+def samples():
+    """List available sample images."""
+    samples_dir = Path("static/samples")
+    if not samples_dir.exists():
+        return jsonify({"samples": []})
+    files = sorted([f.name for f in samples_dir.iterdir() if f.suffix.lower() in (".jpg", ".png", ".jpeg")])
+    return jsonify({"samples": files})
 
 
 if __name__ == "__main__":
