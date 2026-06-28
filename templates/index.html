@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +31,7 @@
                     <div class="stat-label">Predicted Attributes</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">ResNet50</div>
+                    <div class="stat-value">MobileNetV2</div>
                     <div class="stat-label">Deep Model</div>
                 </div>
                 <div class="stat">
@@ -62,12 +62,17 @@
                 <div class="spinner"></div>
                 <p>AI is analyzing the image...</p>
             </div>
+            <div class="samples-section">
+                <h3 class="samples-title">Or try a sample image</h3>
+                <div id="samplesGrid" class="samples-grid"></div>
+            </div>
         </div>
     </section>
 
     <section id="results" class="results-section" style="display:none;">
         <div class="container">
             <h2 class="section-title">Recognition Results</h2>
+            <div id="feedbackBox" class="feedback-box" style="display:none;"></div>
             <div class="results-grid">
                 <div class="result-card" id="cardCarType">
                     <div class="card-label">Car Type</div>
@@ -96,6 +101,10 @@
                 <h3 class="subsection-title">Model Comparison</h3>
                 <div class="comparison-grid" id="comparisonGrid"></div>
             </div>
+            <div class="topk-section">
+                <h3 class="subsection-title">Top-5 Predictions (Car Type)</h3>
+                <div id="topkList" class="topk-list"></div>
+            </div>
         </div>
     </section>
 
@@ -116,7 +125,7 @@
                 <div class="step-card">
                     <div class="step-number">3</div>
                     <h3>Multi-Model Prediction</h3>
-                    <p>Classical ML (Random Forest) and Deep Learning (ResNet50 multi-task) predict in parallel</p>
+                    <p>Classical ML (Random Forest) and Deep Learning (MobileNetV2 multi-task) predict in parallel</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">4</div>
@@ -131,10 +140,10 @@
         <div class="container">
             <h2 class="section-title">About the Project</h2>
             <p class="about-text">CarSpec AI is a computer vision-based vehicle multi-attribute recognition system, trained using the CompCars dataset (130k+ images).
-            The project implements three modeling approaches: Naive baseline, Classical ML (Random Forest + interpretable features), Deep Learning (ResNet50 multi-task learning),
+            The project implements three modeling approaches: Naive baseline, Classical ML (Random Forest + interpretable features), Deep Learning (MobileNetV2 multi-task learning),
             and provides better performance and interpretability than single-task models through multi-task joint learning and interpretable visual features.</p>
             <div class="tech-stack">
-                <span class="tech-tag">ResNet50</span>
+                <span class="tech-tag">MobileNetV2</span>
                 <span class="tech-tag">Random Forest</span>
                 <span class="tech-tag">Multi-Task Learning</span>
                 <span class="tech-tag">Interpretable AI</span>
