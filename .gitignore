@@ -1,7 +1,6 @@
 data/raw/
 data/processed/*.npz
 data/processed/*_sub.csv
-data/outputs/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/outputs/.gitkeep
