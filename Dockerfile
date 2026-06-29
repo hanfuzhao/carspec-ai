@@ -16,4 +16,4 @@ RUN mkdir -p models data/raw data/processed data/outputs
 ENV PORT=7860
 EXPOSE 7860
 
-CMD ["python", "main.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--timeout", "120", "main:app"]

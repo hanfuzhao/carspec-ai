@@ -43,7 +43,7 @@ This produces `models/*.pkl`, `models/deep_multitask.pt`, and `data/outputs/metr
 python main.py
 ```
 
-App starts on `http://localhost:7860`. Models are auto-downloaded from HuggingFace Hub on first run.
+App starts on `http://localhost:5000` (default). For Docker/HF Space, set `PORT=7860` env var. Models are auto-downloaded from HuggingFace Hub on first run.
 
 ### 4. Deploy (Docker)
 

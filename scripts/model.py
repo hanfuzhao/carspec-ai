@@ -6,7 +6,7 @@ Unified interface:
 - predict_proba(X) predict probability
 - save(path) / load(path) persistence
 
-Deep model uses PyTorch + torchvision ResNet50.
+Deep model uses PyTorch + torchvision MobileNetV2 (default) or ResNet50 (optional).
 """
 import os
 import json
@@ -116,7 +116,7 @@ class ClassicalModel:
 
 
 class DeepMultiTaskModel:
-    """ResNet50 transfer learning + multi-task classification head (PyTorch).
+    """MobileNetV2 (default) or ResNet50 transfer learning + multi-task classification head (PyTorch).
 
     Shared backbone, three classification heads predict respectively:
     - car_type (5 classes)
@@ -124,7 +124,7 @@ class DeepMultiTaskModel:
     - seat_count (3 classes)
     """
 
-    def __init__(self, backbone="resnet50", use_aux_features=False, aux_dim=50, device=None):
+    def __init__(self, backbone="mobilenet", use_aux_features=False, aux_dim=50, device=None):
         self.backbone_name = backbone
         self.use_aux_features = use_aux_features
         self.aux_dim = aux_dim
