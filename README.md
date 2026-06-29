@@ -63,7 +63,7 @@ Visit the HuggingFace Space: https://hanfuzhao781-carspec-ai.hf.space
 
 ```
 ├── README.md
-├── REPORT.md               <- Full project report
+├── TECHNICAL_REPORT.md     <- Full project report
 ├── PITCH.md                <- 5-minute pitch script
 ├── GRADING.md              <- Rubric mapping
 ├── requirements.txt        <- Full deps (training + deploy)
