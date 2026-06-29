@@ -1,7 +1,7 @@
 """Interpretable visual feature extraction: body proportions, contour curvature, color statistics, texture features.
 
 These features are used for:
-1. Input for Classical ML model (HOG+color+handcrafted features+SVM)
+1. Input for Classical ML model (HOG+color+handcrafted features + Random Forest)
 2. Auxiliary input for Deep model (concatenated after global features)
 3. Provide interpretability (which visual features influenced predictions)
 """
