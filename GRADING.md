@@ -3,29 +3,29 @@
 This document maps every rubric item to the specific file, section, or URL where the evidence lives.
 
 ## 1. Project Topic & Originality
-- **Topic**: Computer vision — vehicle multi-attribute recognition (car type / door count / seat count). See `REPORT.md` §1 Problem Statement.
-- **Originality**: Multi-task joint learning fused with interpretable handcrafted features + insight-driven experiments (robustness / confidence gating / head-tail). See `REPORT.md` §3.4 Novelty; `README.md` → Originality Statement.
-- **Evidence**: `REPORT.md`, `README.md`.
+- **Topic**: Computer vision — vehicle multi-attribute recognition (car type / door count / seat count). See `TECHNICAL_REPORT.md` §1 Problem Statement.
+- **Originality**: Multi-task joint learning fused with interpretable handcrafted features + insight-driven experiments (robustness / confidence gating / head-tail). See `TECHNICAL_REPORT.md` §3.4 Novelty; `README.md` → Originality Statement.
+- **Evidence**: `TECHNICAL_REPORT.md`, `README.md`.
 
 ## 2. Modeling Requirements (three models)
 | Requirement | Code | Trained Model | Report Section |
 |------|------|-----------|------|
-| Naive baseline (majority + random) | `scripts/model.py::NaiveBaseline` | `models/naive_*.pkl` | `REPORT.md` §5.1, §8.1 |
-| Classical ML (non-deep) | `scripts/model.py::ClassicalModel` (Random Forest + 50-dim features) | `models/classical_*.pkl` | `REPORT.md` §5.2, §8.1 |
-| Deep Learning | `scripts/model.py::DeepMultiTaskModel` (MobileNetV2 multi-task) | `models/deep_multitask.pt` | `REPORT.md` §5.3, §8.1 |
+| Naive baseline (majority + random) | `scripts/model.py::NaiveBaseline` | `models/naive_*.pkl` | `TECHNICAL_REPORT.md` §5.1, §8.1 |
+| Classical ML (non-deep) | `scripts/model.py::ClassicalModel` (Random Forest + 50-dim features) | `models/classical_*.pkl` | `TECHNICAL_REPORT.md` §5.2, §8.1 |
+| Deep Learning | `scripts/model.py::DeepMultiTaskModel` (MobileNetV2 multi-task) | `models/deep_multitask.pt` | `TECHNICAL_REPORT.md` §5.3, §8.1 |
 
 Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 
 ## 3. Experiments & Analysis
 | Requirement | Code | Output | Report Section |
 |------|------|------|------|
-| Robustness (4 corruptions × 3 severities) | `scripts/experiment.py::robustness_experiment` | `data/outputs/robustness.png`; `metrics.json.robustness` | `REPORT.md` §10.4 |
-| Confidence gating / selective prediction | `scripts/experiment.py::confidence_gating_experiment` | `data/outputs/confidence_curve.png` + `confidence_analysis.json`; `metrics.json.confidence_gating` | `REPORT.md` §10.5 |
-| Head/tail analysis | `scripts/experiment.py::head_tail_analysis` | `metrics.json.head_tail` (with `gap`) | `REPORT.md` §10.6 |
-| Data size sensitivity | `scripts/experiment.py::data_size_sensitivity` | `metrics.json.data_size_sensitivity` | `REPORT.md` §10.2/§10.3 |
-| Error analysis (≥5 mispredictions with confidence + test_index) | `scripts/experiment.py::error_analysis` | `metrics.json.error_cases` (10 cases) | `REPORT.md` §9 |
-| Confusion matrices | `scripts/experiment.py::plot_confusion_matrix` | `data/outputs/confusion_matrix.png` + `.npy`; `data/outputs/plots/cm_*.png` | `REPORT.md` §8.3 |
-| Quantitative model comparison | `scripts/experiment.py::plot_model_comparison` | `data/outputs/model_comparison.png`; `metrics.json` | `REPORT.md` §8.1 |
+| Robustness (4 corruptions × 3 severities) | `scripts/experiment.py::robustness_experiment` | `data/outputs/robustness.png`; `metrics.json.robustness` | `TECHNICAL_REPORT.md` §10.4 |
+| Confidence gating / selective prediction | `scripts/experiment.py::confidence_gating_experiment` | `data/outputs/confidence_curve.png` + `confidence_analysis.json`; `metrics.json.confidence_gating` | `TECHNICAL_REPORT.md` §10.5 |
+| Head/tail analysis | `scripts/experiment.py::head_tail_analysis` | `metrics.json.head_tail` (with `gap`) | `TECHNICAL_REPORT.md` §10.6 |
+| Data size sensitivity | `scripts/experiment.py::data_size_sensitivity` | `metrics.json.data_size_sensitivity` | `TECHNICAL_REPORT.md` §10.2/§10.3 |
+| Error analysis (≥5 mispredictions with confidence + test_index) | `scripts/experiment.py::error_analysis` | `metrics.json.error_cases` (10 cases) | `TECHNICAL_REPORT.md` §9 |
+| Confusion matrices | `scripts/experiment.py::plot_confusion_matrix` | `data/outputs/confusion_matrix.png` + `.npy`; `data/outputs/plots/cm_*.png` | `TECHNICAL_REPORT.md` §8.3 |
+| Quantitative model comparison | `scripts/experiment.py::plot_model_comparison` | `data/outputs/model_comparison.png`; `metrics.json` | `TECHNICAL_REPORT.md` §8.1 |
 
 ## 4. Interactive Application
 | Requirement | Location |
@@ -48,27 +48,27 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 ## 5. Written Report
 | Section | Location |
 |------|------|
-| Problem Statement | `REPORT.md` §1 |
-| Data Sources | `REPORT.md` §2 |
-| Related Work | `REPORT.md` §3 |
-| Evaluation Strategy & Metrics (with rationale) | `REPORT.md` §4 |
-| Modeling Approach | `REPORT.md` §5 |
-| Data Processing Pipeline (with per-step rationale) | `REPORT.md` §6 |
-| Hyperparameter Tuning Strategy | `REPORT.md` §7 |
-| Models Evaluated (quantitative comparison, three models) | `REPORT.md` §8.1 |
-| Results Analysis | `REPORT.md` §8.2 |
-| Confusion Matrix | `REPORT.md` §8.3 |
-| Error Analysis (5+ cases with confidence + test_index + root cause + mitigation) | `REPORT.md` §9 |
-| Experiment Write-Up: plan / results / interpretation / recommendation | `REPORT.md` §10.1 – §10.6 |
-| Robustness Experiment | `REPORT.md` §10.4 |
-| Confidence Gating / Selective Prediction | `REPORT.md` §10.5 |
-| Head/Tail Analysis | `REPORT.md` §10.6 |
-| Recommendations | `REPORT.md` §11 |
-| Conclusions | `REPORT.md` §12 |
-| Future Work | `REPORT.md` §13 |
-| Commercial Viability | `REPORT.md` §14 |
-| Ethics Statement | `REPORT.md` §15 |
-| Accuracy numbers consistent with `metrics.json` | `REPORT.md` §8.1 ↔ `data/outputs/metrics.json` |
+| Problem Statement | `TECHNICAL_REPORT.md` §1 |
+| Data Sources | `TECHNICAL_REPORT.md` §2 |
+| Related Work | `TECHNICAL_REPORT.md` §3 |
+| Evaluation Strategy & Metrics (with rationale) | `TECHNICAL_REPORT.md` §4 |
+| Modeling Approach | `TECHNICAL_REPORT.md` §5 |
+| Data Processing Pipeline (with per-step rationale) | `TECHNICAL_REPORT.md` §6 |
+| Hyperparameter Tuning Strategy | `TECHNICAL_REPORT.md` §7 |
+| Models Evaluated (quantitative comparison, three models) | `TECHNICAL_REPORT.md` §8.1 |
+| Results Analysis | `TECHNICAL_REPORT.md` §8.2 |
+| Confusion Matrix | `TECHNICAL_REPORT.md` §8.3 |
+| Error Analysis (5+ cases with confidence + test_index + root cause + mitigation) | `TECHNICAL_REPORT.md` §9 |
+| Experiment Write-Up: plan / results / interpretation / recommendation | `TECHNICAL_REPORT.md` §10.1 – §10.6 |
+| Robustness Experiment | `TECHNICAL_REPORT.md` §10.4 |
+| Confidence Gating / Selective Prediction | `TECHNICAL_REPORT.md` §10.5 |
+| Head/Tail Analysis | `TECHNICAL_REPORT.md` §10.6 |
+| Recommendations | `TECHNICAL_REPORT.md` §11 |
+| Conclusions | `TECHNICAL_REPORT.md` §12 |
+| Future Work | `TECHNICAL_REPORT.md` §13 |
+| Commercial Viability | `TECHNICAL_REPORT.md` §14 |
+| Ethics Statement | `TECHNICAL_REPORT.md` §15 |
+| Accuracy numbers consistent with `metrics.json` | `TECHNICAL_REPORT.md` §8.1 ↔ `data/outputs/metrics.json` |
 
 ## 6. Pitch
 - **File**: `PITCH.md` — 5-minute script with problem/motivation, method overview, live demo link, results/insights, future work.
