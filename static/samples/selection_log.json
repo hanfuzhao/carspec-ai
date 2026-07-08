@@ -1,0 +1,36 @@
+{
+  "updated_at": "2026-07-06 10:06:25",
+  "selected_from": "test set (974 images, deep model correct + high confidence)",
+  "samples": {
+    "sedan": {
+      "path": "/Users/leo/Desktop/540 summer/Module 2 Project/data/real_cars_large/sedan/000489.jpg",
+      "confidence": 0.9812613725662231,
+      "true": "sedan",
+      "pred": "sedan"
+    },
+    "suv": {
+      "path": "/Users/leo/Desktop/540 summer/Module 2 Project/data/real_cars_large/suv/000303.jpg",
+      "confidence": 0.9790209531784058,
+      "true": "suv",
+      "pred": "suv"
+    },
+    "mpv": {
+      "path": "/Users/leo/Desktop/540 summer/Module 2 Project/data/real_cars_large/mpv/000268.jpg",
+      "confidence": 0.9729076027870178,
+      "true": "mpv",
+      "pred": "mpv"
+    },
+    "coupe": {
+      "path": "/Users/leo/Desktop/540 summer/Module 2 Project/data/real_cars_large/coupe/001052.jpg",
+      "confidence": 0.9680228233337402,
+      "true": "coupe",
+      "pred": "coupe"
+    },
+    "hatchback": {
+      "path": "/Users/leo/Desktop/540 summer/Module 2 Project/data/real_cars_large/hatchback/000593.jpg",
+      "confidence": 0.9721398949623108,
+      "true": "hatchback",
+      "pred": "hatchback"
+    }
+  }
+}
