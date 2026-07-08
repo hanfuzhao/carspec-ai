@@ -1,6 +1,8 @@
 data/raw/
 data/processed/*.npz
 data/processed/*_sub.csv
+data/real_cars/
+data/real_cars_large/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/outputs/.gitkeep
