@@ -37,7 +37,6 @@ MAX_SAMPLES = int(os.environ.get("MAX_SAMPLES", "0"))
 
 
 def _map_car_type(raw_type: str) -> str:
-    """Map CompCars raw car type to 5 classes."""
     t = str(raw_type).lower().strip()
     if any(k in t for k in ["sedan", "saloon"]):
         return "sedan"
@@ -53,7 +52,6 @@ def _map_car_type(raw_type: str) -> str:
 
 
 def _map_door_count(num_doors) -> str:
-    """Map door count to 3 classes."""
     try:
         n = int(float(num_doors))
     except (ValueError, TypeError):
@@ -66,7 +64,6 @@ def _map_door_count(num_doors) -> str:
 
 
 def _map_seat_count(num_seats) -> str:
-    """Map seat count to 3 classes."""
     try:
         n = int(float(num_seats))
     except (ValueError, TypeError):
@@ -79,7 +76,6 @@ def _map_seat_count(num_seats) -> str:
 
 
 def load_attributes() -> pd.DataFrame:
-    """Load CompCars attribute data."""
     attr_path = PART_DIR / "attr.json"
     if not attr_path.exists():
         raise FileNotFoundError(
@@ -169,7 +165,6 @@ def make_splits(df: pd.DataFrame, seed: int = SEED):
 
 
 def get_splits(force: bool = False):
-    """Get data splits with cache."""
     SPLIT_DIR.mkdir(parents=True, exist_ok=True)
     paths = {s: SPLIT_DIR / f"{s}.csv" for s in ("train", "val", "test")}
     if all(p.exists() for p in paths.values()) and not force:
@@ -182,7 +177,6 @@ def get_splits(force: bool = False):
 
 
 def load_image(path: str, size: int = IMG_SIZE):
-    """Load and preprocess a single image."""
     img = Image.open(path).convert("RGB")
     img = img.resize((size, size), Image.BILINEAR)
     return np.array(img, dtype=np.float32) / 255.0
