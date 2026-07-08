@@ -71,7 +71,7 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 | Accuracy numbers consistent with `metrics.json` | `TECHNICAL_REPORT.md` §8.1 ↔ `data/outputs/metrics.json` |
 
 ## 6. Pitch
-- **File**: `PITCH.md` - 5-minute script with problem/motivation, method overview, live demo link, results/insights, future work.
+- **File**: `PITCH.md` (local deliverable, not in repo) - 5-minute script with problem/motivation, method overview, live demo link, results/insights, future work. Slide deck: `PITCH_SLIDES.pptx` (local).
 
 ## 7. Code & Repository / Git Best Practices
 | Requirement | Evidence |
