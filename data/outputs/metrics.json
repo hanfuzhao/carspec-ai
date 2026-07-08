@@ -1,414 +1,276 @@
 {
-  "timestamp": "2026-06-28T01:21:35.095032",
   "naive_majority": {
     "car_type": {
-      "accuracy": 0.23,
-      "n_samples": 600
+      "accuracy": 0.22910216718266255,
+      "top5_accuracy": 0.22910216718266255
     },
     "door_count": {
-      "accuracy": 0.38,
-      "n_samples": 600
+      "accuracy": 0.5768833849329206,
+      "top5_accuracy": 0.5768833849329206
     },
     "seat_count": {
-      "accuracy": 0.53,
-      "n_samples": 600
+      "accuracy": 0.5758513931888545,
+      "top5_accuracy": 0.5758513931888545
     }
   },
   "naive_random": {
     "car_type": {
-      "accuracy": 0.22833333333333333,
-      "n_samples": 600
+      "accuracy": 0.2,
+      "top5_accuracy": 1.0
     },
     "door_count": {
-      "accuracy": 0.0,
-      "n_samples": 600
+      "accuracy": 0.3333333333333333,
+      "top5_accuracy": 1.0
     },
     "seat_count": {
-      "accuracy": 0.0,
-      "n_samples": 600
+      "accuracy": 0.3333333333333333,
+      "top5_accuracy": 1.0
     }
   },
   "classical": {
     "car_type": {
-      "accuracy": 0.21833333333333332,
-      "precision": 0.21921684408189052,
-      "recall": 0.21833333333333332,
-      "f1": 0.21847890645659604,
-      "n_samples": 600,
-      "confusion_matrix": [
-        [
-          26,
-          28,
-          21,
-          24,
-          21
-        ],
-        [
-          29,
-          33,
-          29,
-          20,
-          27
-        ],
-        [
-          24,
-          32,
-          27,
-          19,
-          18
-        ],
-        [
-          18,
-          23,
-          29,
-          19,
-          13
-        ],
-        [
-          24,
-          25,
-          25,
-          20,
-          26
-        ]
-      ]
+      "accuracy": 0.4066047471620227,
+      "top5_accuracy": 1.0,
+      "mean_confidence": 0.3424057976545574
     },
     "door_count": {
-      "accuracy": 0.36666666666666664,
-      "precision": 0.36683957257601835,
-      "recall": 0.36666666666666664,
-      "f1": 0.3667115813262535,
-      "n_samples": 600,
-      "confusion_matrix": [
-        [
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0
-        ]
-      ]
+      "accuracy": 0.6109391124871001,
+      "top5_accuracy": 1.0,
+      "mean_confidence": 0.5084730007639484
     },
     "seat_count": {
-      "accuracy": 0.405,
-      "precision": 0.39413905028163165,
-      "recall": 0.405,
-      "f1": 0.39907831122693,
-      "n_samples": 600,
-      "confusion_matrix": [
-        [
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0
-        ]
-      ]
+      "accuracy": 0.608875128998968,
+      "top5_accuracy": 1.0,
+      "mean_confidence": 0.5361221748645623
     }
   },
   "deep": {
     "car_type": {
-      "accuracy": 0.2,
-      "precision": 0.16144381533101046,
-      "recall": 0.2,
-      "f1": 0.15173477882849767,
-      "n_samples": 80,
+      "accuracy": 0.7708978328173375,
       "top5_accuracy": 1.0,
-      "mean_confidence": 0.22991091925650836
+      "mean_confidence": 0.799189009656601
     },
     "door_count": {
-      "accuracy": 0.325,
-      "precision": 0.21628289473684212,
-      "recall": 0.325,
-      "f1": 0.18174962292609348,
-      "n_samples": 80,
+      "accuracy": 0.8194014447884417,
       "top5_accuracy": 1.0,
-      "mean_confidence": 0.40442924536764624
+      "mean_confidence": 0.8420296854525036
     },
     "seat_count": {
-      "accuracy": 0.575,
-      "precision": 0.330625,
-      "recall": 0.575,
-      "f1": 0.41984126984126985,
-      "n_samples": 80,
+      "accuracy": 0.8596491228070176,
       "top5_accuracy": 1.0,
-      "mean_confidence": 0.5073525227606297
+      "mean_confidence": 0.859337461837428
     }
   },
   "robustness": {
-    "car_type": {
-      "gaussian_noise": {
-        "severity_1": 0.21833333333333332,
-        "severity_2": 0.21833333333333332,
-        "severity_3": 0.21833333333333332
-      },
-      "motion_blur": {
-        "severity_1": 0.21833333333333332,
-        "severity_2": 0.21833333333333332,
-        "severity_3": 0.21833333333333332
-      },
-      "jpeg_compression": {
-        "severity_1": 0.21833333333333332,
-        "severity_2": 0.21833333333333332,
-        "severity_3": 0.21833333333333332
-      },
-      "pixelate": {
-        "severity_1": 0.21833333333333332,
-        "severity_2": 0.21833333333333332,
-        "severity_3": 0.21833333333333332
-      },
-      "mean_corruption_accuracy": 0.21833333333333335,
-      "per_corruption_mean": {
-        "gaussian_noise": 0.21833333333333335,
-        "motion_blur": 0.21833333333333335,
-        "jpeg_compression": 0.21833333333333335,
-        "pixelate": 0.21833333333333335
-      }
-    }
+    "gaussian_noise_0.05": 0.7048503611971104,
+    "gaussian_noise_0.1": 0.5789473684210527,
+    "gaussian_noise_0.2": 0.3457172342621259,
+    "mean_corruption_accuracy": 0.543171654626763
   },
   "head_tail": {
-    "car_type": {
-      "head_classes": [
-        "sedan",
-        "suv"
-      ],
-      "tail_classes": [
-        "coupe",
-        "hatchback",
-        "mpv"
-      ],
-      "head_accuracy": 0.22868217054263565,
-      "tail_accuracy": 0.21052631578947367,
-      "gap": 0.018155854753161976,
-      "head_n": 258,
-      "tail_n": 342
+    "head_accuracy": 0.9047619047619048,
+    "tail_accuracy": 0.6542553191489362,
+    "gap": 0.25050658561296857,
+    "per_class": {
+      "sedan": 0.6542553191489362,
+      "suv": 0.8202247191011236,
+      "mpv": 0.9047619047619048,
+      "coupe": 0.8018018018018018,
+      "hatchback": 0.671875
     }
   },
   "error_cases": [
     {
-      "test_index": 0,
-      "true": "hatchback",
+      "test_index": 3893,
+      "true_label": "sedan",
       "predicted": "mpv",
-      "confidence": 0.23833972049839464,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/58/000057.jpg",
-      "model_id": "58"
+      "confidence": 0.7313,
+      "task": "car_type"
     },
     {
-      "test_index": 1,
-      "true": "sedan",
-      "predicted": "hatchback",
-      "confidence": 0.1795798927841236,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/89/000388.jpg",
-      "model_id": "89"
-    },
-    {
-      "test_index": 2,
-      "true": "suv",
-      "predicted": "mpv",
-      "confidence": 0.22184544575618032,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/33/000432.jpg",
-      "model_id": "33"
-    },
-    {
-      "test_index": 3,
-      "true": "coupe",
-      "predicted": "mpv",
-      "confidence": 0.319524501873785,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/54/000453.jpg",
-      "model_id": "54"
-    },
-    {
-      "test_index": 4,
-      "true": "hatchback",
+      "test_index": 1212,
+      "true_label": "hatchback",
       "predicted": "sedan",
-      "confidence": 0.13946901500970693,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/100/000399.jpg",
-      "model_id": "100"
+      "confidence": 0.8206,
+      "task": "car_type"
     },
     {
-      "test_index": 6,
-      "true": "coupe",
+      "test_index": 2374,
+      "true_label": "mpv",
       "predicted": "hatchback",
-      "confidence": 0.17795972910322216,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/56/000055.jpg",
-      "model_id": "56"
+      "confidence": 0.3262,
+      "task": "car_type"
     },
     {
-      "test_index": 7,
-      "true": "suv",
-      "predicted": "mpv",
-      "confidence": 0.27991235735381015,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/25/000024.jpg",
-      "model_id": "25"
-    },
-    {
-      "test_index": 9,
-      "true": "sedan",
+      "test_index": 1318,
+      "true_label": "hatchback",
       "predicted": "coupe",
-      "confidence": 0.1330106473311107,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/36/000035.jpg",
-      "model_id": "36"
+      "confidence": 0.4257,
+      "task": "car_type"
     },
     {
-      "test_index": 10,
-      "true": "coupe",
-      "predicted": "mpv",
-      "confidence": 0.2566441886064109,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/26/000325.jpg",
-      "model_id": "26"
+      "test_index": 206,
+      "true_label": "coupe",
+      "predicted": "sedan",
+      "confidence": 0.7968,
+      "task": "car_type"
     },
     {
-      "test_index": 11,
-      "true": "hatchback",
+      "test_index": 4161,
+      "true_label": "suv",
       "predicted": "coupe",
-      "confidence": 0.14498390336091144,
-      "task": "car_type",
-      "model": "classical",
-      "img_path": "data/raw/compcars/image/87/000086.jpg",
-      "model_id": "87"
-    }
-  ],
-  "confidence_gating": [
-    {
-      "threshold": 0.2,
-      "accuracy": 0.21833333333333332,
-      "coverage": 1.0,
-      "n_selected": 600
+      "confidence": 0.367,
+      "task": "car_type"
     },
     {
-      "threshold": 0.3,
-      "accuracy": 0.14018691588785046,
-      "coverage": 0.17833333333333334,
-      "n_selected": 107
+      "test_index": 3238,
+      "true_label": "sedan",
+      "predicted": "suv",
+      "confidence": 0.3262,
+      "task": "car_type"
     },
     {
-      "threshold": 0.4,
-      "accuracy": 0.25,
-      "coverage": 0.013333333333333334,
-      "n_selected": 8
+      "test_index": 1891,
+      "true_label": "hatchback",
+      "predicted": "sedan",
+      "confidence": 0.4597,
+      "task": "car_type"
     },
     {
-      "threshold": 0.5,
-      "accuracy": 0.0,
-      "coverage": 0.0,
-      "n_selected": 0
+      "test_index": 1895,
+      "true_label": "hatchback",
+      "predicted": "sedan",
+      "confidence": 0.623,
+      "task": "car_type"
     },
     {
-      "threshold": 0.6,
-      "accuracy": 0.0,
-      "coverage": 0.0,
-      "n_selected": 0
+      "test_index": 3304,
+      "true_label": "sedan",
+      "predicted": "hatchback",
+      "confidence": 0.571,
+      "task": "car_type"
     },
     {
-      "threshold": 0.7,
-      "accuracy": 0.0,
-      "coverage": 0.0,
-      "n_selected": 0
+      "test_index": 3279,
+      "true_label": "sedan",
+      "predicted": "coupe",
+      "confidence": 0.7472,
+      "task": "car_type"
     },
     {
-      "threshold": 0.8,
-      "accuracy": 0.0,
-      "coverage": 0.0,
-      "n_selected": 0
+      "test_index": 4589,
+      "true_label": "suv",
+      "predicted": "mpv",
+      "confidence": 0.475,
+      "task": "car_type"
     },
     {
-      "threshold": 0.9,
-      "accuracy": 0.0,
-      "coverage": 0.0,
-      "n_selected": 0
-    }
-  ],
-  "data_size_sensitivity": [
-    {
-      "accuracy": 0.99,
-      "precision": 0.9901212522045857,
-      "recall": 0.99,
-      "f1": 0.9900035207621414,
-      "n_samples": 300,
-      "fraction": 0.1,
-      "n_train": 300
+      "test_index": 3303,
+      "true_label": "sedan",
+      "predicted": "coupe",
+      "confidence": 0.7257,
+      "task": "car_type"
     },
     {
-      "accuracy": 0.9693333333333334,
-      "precision": 0.969879526029526,
-      "recall": 0.9693333333333334,
-      "f1": 0.9694039276402192,
-      "n_samples": 750,
-      "fraction": 0.25,
-      "n_train": 750
+      "test_index": 647,
+      "true_label": "coupe",
+      "predicted": "sedan",
+      "confidence": 0.5748,
+      "task": "car_type"
     },
     {
-      "accuracy": 0.91,
-      "precision": 0.9108800671461996,
-      "recall": 0.91,
-      "f1": 0.9100090052716974,
-      "n_samples": 1500,
-      "fraction": 0.5,
-      "n_train": 1500
-    },
-    {
-      "accuracy": 0.754,
-      "precision": 0.7560728630212186,
-      "recall": 0.754,
-      "f1": 0.7542804793581572,
-      "n_samples": 3000,
-      "fraction": 1.0,
-      "n_train": 3000
+      "test_index": 1249,
+      "true_label": "hatchback",
+      "predicted": "coupe",
+      "confidence": 0.8355,
+      "task": "car_type"
     }
   ],
   "meta": {
-    "dataset": "CompCars (synthetic fallback if real data missing)",
-    "n_train": 4800,
-    "n_val": 600,
-    "n_test": 600,
+    "dataset": "Real car photos (Bing Image Search via icrawler) - 4869 images, 5 classes",
+    "n_train": 3895,
+    "n_test": 969,
+    "img_size": 224,
     "feature_dim": 50,
-    "deep_status": {
-      "status": "trained",
-      "history": {
-        "train_loss": [
-          3.75329753557841,
-          3.7025896549224853
-        ],
-        "val_acc": [
-          0.2375,
-          0.2375
-        ]
+    "deep_backbone": "MobileNetV2",
+    "deep_epochs": 80,
+    "eval_date": "2026-07-06 10:09:33",
+    "demo_samples": {
+      "true_labels": [
+        "sedan",
+        "suv",
+        "mpv",
+        "coupe",
+        "hatchback"
+      ],
+      "classical_predictions": [
+        "suv",
+        "suv",
+        "mpv",
+        "coupe",
+        "hatchback"
+      ],
+      "deep_predictions": [
+        "sedan",
+        "suv",
+        "mpv",
+        "coupe",
+        "hatchback"
+      ],
+      "deep_confidences": [
+        0.9812613725662231,
+        0.9790209531784058,
+        0.9729076027870178,
+        0.9680227041244507,
+        0.9721398949623108
+      ]
+    }
+  },
+  "confidence_gating": {
+    "0.2": {
+      "coverage": 1.0,
+      "accuracy": 0.7708978328173375
+    },
+    "0.3": {
+      "coverage": 0.9958720330237358,
+      "accuracy": 0.7740932642487046
+    },
+    "0.4": {
+      "coverage": 0.9597523219814241,
+      "accuracy": 0.7967741935483871
+    },
+    "0.5": {
+      "coverage": 0.8895768833849329,
+      "accuracy": 0.8236658932714617
+    },
+    "0.6": {
+      "coverage": 0.8142414860681114,
+      "accuracy": 0.8580481622306717
+    },
+    "0.7": {
+      "coverage": 0.7554179566563467,
+      "accuracy": 0.8838797814207651
+    },
+    "0.8": {
+      "coverage": 0.6480908152734778,
+      "accuracy": 0.9251592356687898
+    }
+  },
+  "data_size_sensitivity": {
+    "comparison": {
+      "small_dataset": {
+        "n_images": 100,
+        "deep_car_type_accuracy": 0.55,
+        "deep_door_count_accuracy": 0.65,
+        "deep_seat_count_accuracy": 0.65
+      },
+      "large_dataset": {
+        "n_images": 4869,
+        "deep_car_type_accuracy": 0.7708978328173375,
+        "deep_door_count_accuracy": 0.8194014447884417,
+        "deep_seat_count_accuracy": 0.8596491228070176
       }
     },
-    "seed": 42
+    "note": "Scaling from 100 to 4869 real images improved car_type accuracy from 0.55 to 0.77 (+22%)."
   }
 }
