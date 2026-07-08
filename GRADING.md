@@ -1,10 +1,10 @@
-# GRADING.md — Rubric Mapping
+# GRADING.md - Rubric Mapping
 
-This document maps every rubric item to the specific file, section, or URL where the evidence lives.
+Each rubric item points to the file/section/URL where the evidence lives.
 
 ## 1. Project Topic & Originality
-- **Topic**: Computer vision — vehicle multi-attribute recognition (car type / door count / seat count). See `TECHNICAL_REPORT.md` §1 Problem Statement.
-- **Originality**: Multi-task joint learning fused with interpretable handcrafted features + insight-driven experiments (robustness / confidence gating / head-tail). See `TECHNICAL_REPORT.md` §3.4 Novelty; `README.md` → Originality Statement.
+- **Topic**: Computer vision - vehicle multi-attribute recognition (car type / door count / seat count). See `TECHNICAL_REPORT.md` §1 Problem Statement.
+- **Originality**: Multi-task learning + interpretable handcrafted features + experiments on robustness / gating / head-tail (robustness / confidence gating / head-tail). See `TECHNICAL_REPORT.md` §3 Related Work, last paragraph; `README.md` → Originality Statement.
 - **Evidence**: `TECHNICAL_REPORT.md`, `README.md`.
 
 ## 2. Modeling Requirements (three models)
@@ -23,7 +23,7 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 | Confidence gating / selective prediction | `scripts/experiment.py::confidence_gating_experiment` | `data/outputs/confidence_curve.png` + `confidence_analysis.json`; `metrics.json.confidence_gating` | `TECHNICAL_REPORT.md` §10.5 |
 | Head/tail analysis | `scripts/experiment.py::head_tail_analysis` | `metrics.json.head_tail` (with `gap`) | `TECHNICAL_REPORT.md` §10.6 |
 | Data size sensitivity | `scripts/experiment.py::data_size_sensitivity` | `metrics.json.data_size_sensitivity` | `TECHNICAL_REPORT.md` §10.2/§10.3 |
-| Error analysis (≥5 mispredictions with confidence + test_index) | `scripts/experiment.py::error_analysis` | `metrics.json.error_cases` (10 cases) | `TECHNICAL_REPORT.md` §9 |
+| Error analysis (≥5 mispredictions with confidence + test_index) | `scripts/experiment.py::error_analysis` | `metrics.json.error_cases` (15 cases) | `TECHNICAL_REPORT.md` §9 |
 | Confusion matrices | `scripts/experiment.py::plot_confusion_matrix` | `data/outputs/confusion_matrix.png` + `.npy`; `data/outputs/plots/cm_*.png` | `TECHNICAL_REPORT.md` §8.3 |
 | Quantitative model comparison | `scripts/experiment.py::plot_model_comparison` | `data/outputs/model_comparison.png`; `metrics.json` | `TECHNICAL_REPORT.md` §8.1 |
 
@@ -59,7 +59,7 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 | Results Analysis | `TECHNICAL_REPORT.md` §8.2 |
 | Confusion Matrix | `TECHNICAL_REPORT.md` §8.3 |
 | Error Analysis (5+ cases with confidence + test_index + root cause + mitigation) | `TECHNICAL_REPORT.md` §9 |
-| Experiment Write-Up: plan / results / interpretation / recommendation | `TECHNICAL_REPORT.md` §10.1 – §10.6 |
+| Experiment Write-Up: plan / results / interpretation / recommendation | `TECHNICAL_REPORT.md` §10.1–§10.6 |
 | Robustness Experiment | `TECHNICAL_REPORT.md` §10.4 |
 | Confidence Gating / Selective Prediction | `TECHNICAL_REPORT.md` §10.5 |
 | Head/Tail Analysis | `TECHNICAL_REPORT.md` §10.6 |
@@ -71,12 +71,12 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 | Accuracy numbers consistent with `metrics.json` | `TECHNICAL_REPORT.md` §8.1 ↔ `data/outputs/metrics.json` |
 
 ## 6. Pitch
-- **File**: `PITCH.md` — 5-minute script with problem/motivation, method overview, live demo link, results/insights, future work.
+- **File**: `PITCH.md` (local deliverable, not in repo) - 5-minute script with problem/motivation, method overview, live demo link, results/insights, future work. Slide deck: `PITCH_SLIDES.pptx` (local).
 
 ## 7. Code & Repository / Git Best Practices
 | Requirement | Evidence |
 |------|------|
-| Branch-based workflow + reviewed PRs | 16 PRs merged into `main` (commit history visible via `git log`) |
+| Branch-based workflow + reviewed PRs | 24 PRs merged into `main` (commit history visible via `git log`) |
 | PR template | `.github/pull_request_template.md` |
 | Keep-alive workflow (real URL) | `.github/workflows/keep-alive.yml` |
 | `.gitignore` (covers `__pycache__`, `*.pyc`, `data/processed/*.npz`, large models) | `.gitignore` |
@@ -123,7 +123,7 @@ Training pipeline: `setup.py` (9 steps). Reproduce with `python setup.py`.
 ## 12. Evaluation Outputs (data/outputs/)
 | File | Origin |
 |------|------|
-| `metrics.json` | `setup.py` → `run_full_evaluation()` — contains `naive_majority`, `naive_random`, `classical`, `deep`, `robustness`, `head_tail`, `error_cases`, `confidence_gating`, `data_size_sensitivity`, `meta` |
+| `metrics.json` | `setup.py` → `run_full_evaluation()` - contains `naive_majority`, `naive_random`, `classical`, `deep`, `robustness`, `head_tail`, `error_cases`, `confidence_gating`, `data_size_sensitivity`, `meta` |
 | `model_comparison.png` | `setup.py` step 9 → `plot_model_comparison()` |
 | `confusion_matrix.png` + `.npy` | `setup.py` step 9 |
 | `robustness.png` | `scripts/experiment.py::robustness_experiment` |
