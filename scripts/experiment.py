@@ -17,7 +17,6 @@ PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def compute_metrics(y_true, y_pred, classes=None):
-    """Compute classification metrics."""
     acc = accuracy_score(y_true, y_pred)
     p, r, f1, _ = precision_recall_fscore_support(
         y_true, y_pred, average="weighted", zero_division=0
@@ -32,7 +31,6 @@ def compute_metrics(y_true, y_pred, classes=None):
 
 
 def plot_confusion_matrix(y_true, y_pred, classes, title, save_path):
-    """Plot confusion matrix."""
     cm = confusion_matrix(y_true, y_pred, labels=classes)
     fig, ax = plt.subplots(figsize=(8, 6))
     im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
@@ -103,7 +101,6 @@ def error_analysis(model, X, y, df_meta, task_name, classes, model_name, top_k=1
 
 
 def data_size_sensitivity(model_factory, X_pool, y_pool, fractions=(0.1, 0.25, 0.5, 1.0)):
-    """Training data size sensitivity analysis."""
     results = []
     n = len(y_pool)
     for frac in fractions:
@@ -132,19 +129,17 @@ def multitask_vs_singletask(deep_model, X, y_dict, task_names):
     return results
 
 
-# ==================== Robustness Experiment ====================
+# Robustness Experiment
 
 CORRUPTIONS = ["gaussian_noise", "motion_blur", "jpeg_compression", "pixelate"]
 
 
 def apply_gaussian_noise(img, sigma=0.1):
-    """Add Gaussian noise."""
     noise = np.random.normal(0, sigma, img.shape).astype(np.float32)
     return np.clip(img + noise, 0, 1)
 
 
 def apply_motion_blur(img, kernel_size=15):
-    """Apply horizontal motion blur."""
     try:
         from scipy.ndimage import convolve
     except ImportError:
@@ -165,7 +160,6 @@ def apply_motion_blur(img, kernel_size=15):
 
 
 def _convolve2d(arr, kernel):
-    """Simple 2D convolution fallback."""
     kh, kw = kernel.shape
     ph, pw = kh // 2, kw // 2
     padded = np.pad(arr, ((ph, ph), (pw, pw)), mode="reflect")
@@ -177,7 +171,6 @@ def _convolve2d(arr, kernel):
 
 
 def apply_jpeg_compression(img, quality=20):
-    """Apply JPEG compression artifact simulation."""
     from PIL import Image
     import io
     arr = (img * 255).astype(np.uint8)
@@ -190,7 +183,6 @@ def apply_jpeg_compression(img, quality=20):
 
 
 def apply_pixelate(img, blocks=8):
-    """Pixelate image by averaging blocks."""
     h, w, c = img.shape
     bh, bw = h // blocks, w // blocks
     out = img.copy()
@@ -202,7 +194,6 @@ def apply_pixelate(img, blocks=8):
 
 
 def apply_corruption(img, corruption_type, severity=1):
-    """Apply a corruption to an image."""
     if corruption_type == "gaussian_noise":
         return apply_gaussian_noise(img, sigma=0.05 * severity)
     if corruption_type == "motion_blur":
@@ -265,7 +256,7 @@ def robustness_experiment(model, X_test_images, y_test, classes, task="car_type"
             ax.bar(x + i * width, accs, width, label=corruption)
         ax.set_xlabel("Severity")
         ax.set_ylabel("Accuracy")
-        ax.set_title(f"Robustness — {task}")
+        ax.set_title(f"Robustness - {task}")
         ax.set_xticks(x + width * (len(CORRUPTIONS) - 1) / 2)
         ax.set_xticklabels([f"sev {s}" for s in severities])
         ax.legend()
@@ -276,7 +267,7 @@ def robustness_experiment(model, X_test_images, y_test, classes, task="car_type"
     return results
 
 
-# ==================== Confidence Gating / Selective Prediction ====================
+# Confidence Gating / Selective Prediction
 
 def confidence_gating_experiment(y_true, y_pred, confidences, thresholds=None):
     """Confidence gating: accuracy vs coverage trade-off.
@@ -324,7 +315,7 @@ def confidence_gating_experiment(y_true, y_pred, confidences, thresholds=None):
     ax2.set_ylabel("Coverage", color="darkorange")
     ax2.tick_params(axis="y", labelcolor="darkorange")
     ax2.set_ylim(0, 1.05)
-    plt.title("Confidence Gating — Accuracy vs Coverage")
+    plt.title("Confidence Gating - Accuracy vs Coverage")
     fig.tight_layout()
     plt.savefig(OUTPUTS_DIR / "confidence_curve.png", dpi=150, bbox_inches="tight")
     plt.close()
@@ -334,7 +325,7 @@ def confidence_gating_experiment(y_true, y_pred, confidences, thresholds=None):
     return rows
 
 
-# ==================== Head/Tail Analysis ====================
+# Head/Tail Analysis
 
 def head_tail_analysis(y_true, y_pred, classes, top_k_ratio=0.5):
     """Head/tail (frequency-aware) analysis.
@@ -366,7 +357,7 @@ def head_tail_analysis(y_true, y_pred, classes, top_k_ratio=0.5):
     }
 
 
-# ==================== Aggregation ====================
+# Aggregation
 
 def plot_model_comparison(results_dict, save_path):
     """Plot bar chart comparing models across tasks."""

@@ -1,4 +1,4 @@
-# CarSpec AI — full dependencies (training + evaluation + deployment)
+# CarSpec AI - full dependencies (training + evaluation + deployment)
 numpy>=1.21.0
 pandas>=1.3.0
 Pillow>=8.0.0

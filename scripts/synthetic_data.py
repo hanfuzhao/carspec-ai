@@ -38,7 +38,6 @@ CAR_COLORS = [
 
 
 def draw_car(img_size, car_type, color, door_count, seat_count):
-    """Draw a simulated vehicle image."""
     img = Image.new("RGB", (img_size, img_size), (240, 240, 240))
     draw = ImageDraw.Draw(img)
     tpl = CAR_TEMPLATES[car_type]
@@ -75,7 +74,6 @@ def draw_car(img_size, car_type, color, door_count, seat_count):
 
 
 def generate_synthetic_dataset(n_samples=6000, img_size=224):
-    """Generate synthetic dataset."""
     np.random.seed(SEED)
     IMG_DIR.mkdir(parents=True, exist_ok=True)
     PART_DIR.mkdir(parents=True, exist_ok=True)
@@ -111,15 +109,15 @@ def generate_synthetic_dataset(n_samples=6000, img_size=224):
             print(f"  Generated {i + 1}/{n_samples}")
     df = pd.DataFrame(rows)
     attr_data = []
-    for mid in df["model_id"].unique():
-        sub = df[df["model_id"] == mid].iloc[0]
+    for _, row in df.iterrows():
         attr_data.append({
-            "model_id": int(mid),
-            "max_speed": int(sub["max_speed"]),
-            "displacement": float(sub["displacement"]),
-            "num_doors": sub["door_count"],
-            "num_seats": sub["seat_count"],
-            "type": sub["car_type"],
+            "model_id": int(row["model_id"]),
+            "max_speed": int(row["max_speed"]),
+            "displacement": float(row["displacement"]),
+            "num_doors": row["door_count"],
+            "num_seats": row["seat_count"],
+            "type": row["car_type"],
+            "img_path": row["img_path"],
         })
     with open(PART_DIR / "attr.json", "w") as f:
         json.dump(attr_data, f)

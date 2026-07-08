@@ -43,7 +43,6 @@ def step1_prepare_data():
 
 
 def step2_eda(train, val, test):
-    """Step 2: Exploratory data analysis."""
     print("\n" + "=" * 60)
     print("Step 2: Exploratory Data Analysis")
     print("=" * 60)
@@ -231,7 +230,7 @@ def step7_evaluate_deep(deep_model, test, max_samples=100):
 
 
 def step8_experiments(classical_models, deep_model, X_test, test_sub, train_sub, X_train, y_train):
-    """Step 8: Run all experiments — robustness, confidence gating, head/tail, error cases."""
+    """Step 8: Run all experiments - robustness, confidence gating, head/tail, error cases."""
     print("\n" + "=" * 60)
     print("Step 8: Run focused experiments")
     print("=" * 60)
@@ -333,7 +332,7 @@ def step9_save_plots(model_results, exp_results, X_test, test_sub, classical_mod
         np.save(OUTPUTS_DIR / "confusion_matrix.npy", cm)
         plot_confusion_matrix(
             y_test, y_pred, classes,
-            "Aggregate Confusion Matrix — Classical car_type",
+            "Aggregate Confusion Matrix - Classical car_type",
             OUTPUTS_DIR / "confusion_matrix.png",
         )
         print(f"  confusion_matrix.png + .npy saved")

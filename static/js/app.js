@@ -6,8 +6,9 @@ const predictBtn = document.getElementById('predictBtn');
 const loading = document.getElementById('loading');
 const resultsSection = document.getElementById('results');
 const feedbackBox = document.getElementById('feedbackBox');
-const topkList = document.getElementById('topkList');
-const samplesGrid = document.getElementById('samplesGrid');
+const predictionMeta = document.getElementById('predictionMeta');
+
+const MAX_BYTES = 16 * 1024 * 1024;
 
 let selectedFile = null;
 
@@ -20,7 +21,12 @@ uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag
 uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadArea.classList.remove('dragover');
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+    } else {
+        const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+        if (url) loadSampleAsFile(url);
+    }
 });
 fileInput.addEventListener('change', (e) => {
     if (e.target.files.length) handleFile(e.target.files[0]);
@@ -28,11 +34,11 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFile(file) {
     if (!file.type.startsWith('image/')) {
-        showError('Please upload an image file (JPG, PNG, BMP, or WEBP).');
+        showFeedback('error', 'Invalid file type. JPG or PNG only.', null);
         return;
     }
-    if (file.size > 16 * 1024 * 1024) {
-        showError('File too large. Maximum allowed size is 16MB.');
+    if (file.size > MAX_BYTES) {
+        showFeedback('error', `File too large (${(file.size/1024/1024).toFixed(1)}MB). 16MB max.`, null);
         return;
     }
     selectedFile = file;
@@ -42,7 +48,6 @@ function handleFile(file) {
         preview.style.display = 'block';
         uploadContent.style.display = 'none';
         predictBtn.disabled = false;
-        hideError();
     };
     reader.readAsDataURL(file);
 }
@@ -52,18 +57,18 @@ predictBtn.addEventListener('click', async () => {
     predictBtn.disabled = true;
     loading.style.display = 'block';
     resultsSection.style.display = 'none';
-    hideError();
     const formData = new FormData();
     formData.append('image', selectedFile);
+    const t0 = performance.now();
     try {
         const res = await fetch('/predict', { method: 'POST', body: formData });
         const data = await res.json();
-        if (!res.ok || data.error) {
-            throw new Error(data.error || `HTTP ${res.status}`);
-        }
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        data._inference_ms = performance.now() - t0;
         displayResults(data);
     } catch (err) {
-        showError('Prediction failed: ' + err.message);
+        showFeedback('error', `Prediction failed: ${err.message}`, null);
+        resultsSection.style.display = 'block';
     } finally {
         predictBtn.disabled = false;
         loading.style.display = 'none';
@@ -74,131 +79,188 @@ function displayResults(data) {
     resultsSection.style.display = 'block';
     const classical = data.classical || {};
     const deep = data.deep || {};
-    const source = deep || classical;
-
-    renderFeedback(data.feedback);
-
+    const source = deep && deep.car_type ? deep : classical;
     if (source.car_type) updateCard('CarType', source.car_type);
     if (source.door_count) updateCard('DoorCount', source.door_count);
     if (source.seat_count) updateCard('SeatCount', source.seat_count);
 
-    const expList = document.getElementById('explanationList');
-    expList.innerHTML = '';
-    (data.explanations || []).forEach(exp => {
-        const item = document.createElement('div');
-        item.className = 'explanation-item';
-        item.innerHTML = `<span class="icon">▸</span><span>${exp}</span>`;
-        expList.appendChild(item);
-    });
-
-    const compGrid = document.getElementById('comparisonGrid');
-    compGrid.innerHTML = `
-        <div class="comparison-col">
-            <h4>Classical ML (Random Forest)</h4>
-            <div class="comparison-result">${classical.car_type ? classical.car_type.prediction : '—'}</div>
-            ${classical.car_type ? `<div style="color:var(--success);font-size:14px">Confidence ${(classical.car_type.confidence*100).toFixed(1)}%</div>` : ''}
-        </div>
-        <div class="comparison-col">
-            <h4>Deep Learning (MobileNetV2)</h4>
-            <div class="comparison-result">${deep.car_type ? deep.car_type.prediction : '—'}</div>
-            ${deep.car_type ? `<div style="color:var(--success);font-size:14px">Confidence ${(deep.car_type.confidence*100).toFixed(1)}%</div>` : ''}
-        </div>
-    `;
-
+    renderFeedback(data.confidence, data.feedback);
     renderTopK(data.top_k || []);
+    renderExplanations(data.explanations || []);
+    renderComparison(classical, deep);
+
+    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const ms = data._inference_ms !== undefined ? ` · ${data._inference_ms.toFixed(0)}ms` : '';
+    const model = deep && deep.car_type ? 'deep' : 'classical';
+    predictionMeta.textContent = `${model}${ms} · ${ts}`;
+
     resultsSection.scrollIntoView({ behavior: 'smooth' });
-}
-
-function renderFeedback(feedback) {
-    if (!feedback) {
-        feedbackBox.style.display = 'none';
-        return;
-    }
-    feedbackBox.style.display = 'block';
-    feedbackBox.className = `feedback-box feedback-${feedback.level}`;
-    feedbackBox.innerHTML = `
-        <span class="feedback-icon">${getFeedbackIcon(feedback.level)}</span>
-        <span class="feedback-message">${feedback.message}</span>
-    `;
-}
-
-function getFeedbackIcon(level) {
-    const icons = { success: '✓', warning: '!', error: '✕', info: 'i' };
-    return icons[level] || 'i';
-}
-
-function renderTopK(topK) {
-    topkList.innerHTML = '';
-    if (!topK || topK.length === 0) return;
-    topK.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'topk-row';
-        row.innerHTML = `
-            <div class="topk-rank">#${idx + 1}</div>
-            <div class="topk-label">${item.label}</div>
-            <div class="topk-bar"><div class="topk-fill" style="width:${item.confidence * 100}%"></div></div>
-            <div class="topk-conf">${(item.confidence * 100).toFixed(1)}%</div>
-        `;
-        topkList.appendChild(row);
-    });
-}
-
-function showError(msg) {
-    let errBox = document.getElementById('errorBox');
-    if (!errBox) {
-        errBox = document.createElement('div');
-        errBox.id = 'errorBox';
-        errBox.className = 'feedback-box feedback-error';
-        uploadArea.parentNode.insertBefore(errBox, uploadArea.nextSibling);
-    }
-    errBox.style.display = 'block';
-    errBox.className = 'feedback-box feedback-error';
-    errBox.innerHTML = `<span class="feedback-icon">✕</span><span class="feedback-message">${msg}</span>`;
-}
-
-function hideError() {
-    const errBox = document.getElementById('errorBox');
-    if (errBox) errBox.style.display = 'none';
 }
 
 function updateCard(suffix, result) {
     document.getElementById('res' + suffix).textContent = result.prediction;
-    document.getElementById('conf' + suffix).textContent = `Confidence ${(result.confidence * 100).toFixed(1)}%`;
+    document.getElementById('conf' + suffix).textContent = `conf ${(result.confidence * 100).toFixed(1)}%`;
     const probsDiv = document.getElementById('probs' + suffix);
     probsDiv.innerHTML = '';
     const probs = result.probabilities || {};
-    const sorted = Object.entries(probs).sort((a, b) => b[1] - a[1]);
+    const sorted = Object.entries(probs).sort((a, b) => b[1] - a[1]).slice(0, 4);
     sorted.forEach(([label, prob]) => {
         const bar = document.createElement('div');
         bar.className = 'prob-bar';
         bar.innerHTML = `
-            <div class="prob-label"><span>${label}</span><span>${(prob*100).toFixed(1)}%</span></div>
+            <div class="prob-label"><span>${label}</span><span class="pct">${(prob*100).toFixed(1)}%</span></div>
             <div class="prob-track"><div class="prob-fill" style="width:${prob*100}%"></div></div>
         `;
         probsDiv.appendChild(bar);
     });
 }
 
+function renderFeedback(confidence, feedback) {
+    const level = (feedback && feedback.level) || 'info';
+    const message = (feedback && feedback.message) || 'Done.';
+    const icon = level === 'success' ? '✓' : level === 'warning' ? '!' : level === 'error' ? '×' : 'i';
+    feedbackBox.className = `feedback-box feedback-${level}`;
+    feedbackBox.innerHTML = `
+        <span class="feedback-icon">${icon}</span>
+        <span class="feedback-message">${message}</span>
+        <span class="feedback-conf">${confidence ? (confidence*100).toFixed(1) + '%' : '-'}</span>
+    `;
+}
+
+function showFeedback(level, message, conf) {
+    const icon = level === 'success' ? '✓' : level === 'warning' ? '!' : level === 'error' ? '×' : 'i';
+    feedbackBox.className = `feedback-box feedback-${level}`;
+    feedbackBox.innerHTML = `
+        <span class="feedback-icon">${icon}</span>
+        <span class="feedback-message">${message}</span>
+        <span class="feedback-conf">${conf !== null && conf !== undefined ? conf : '-'}</span>
+    `;
+}
+
+function renderTopK(topK) {
+    const list = document.getElementById('topkList');
+    list.innerHTML = '';
+    if (!topK.length) {
+        list.innerHTML = '<div class="topk-row"><span class="topk-rank">-</span><span class="topk-label">No top-k data (deep model not loaded)</span><span class="topk-bar"></span><span class="topk-conf">-</span></div>';
+        return;
+    }
+    topK.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'topk-row';
+        const label = item.label || item.prediction || '-';
+        const prob = item.probability || item.confidence || 0;
+        row.innerHTML = `
+            <span class="topk-rank">${String(i+1).padStart(2, '0')}</span>
+            <span class="topk-label">${label}</span>
+            <div class="topk-bar"><div class="topk-fill" style="width:${prob*100}%"></div></div>
+            <span class="topk-conf">${(prob*100).toFixed(1)}%</span>
+        `;
+        list.appendChild(row);
+    });
+}
+
+function renderExplanations(exps) {
+    const list = document.getElementById('explanationList');
+    list.innerHTML = '';
+    if (!exps.length) {
+        list.innerHTML = '<div class="explanation-item"><span class="idx">-</span><span class="text">No feature breakdown available.</span></div>';
+        return;
+    }
+    exps.forEach((exp, i) => {
+        const text = typeof exp === 'string' ? exp : (exp.text || JSON.stringify(exp));
+        const item = document.createElement('div');
+        item.className = 'explanation-item';
+        item.innerHTML = `<span class="idx">${String(i+1).padStart(2, '0')}</span><span class="text">${text}</span>`;
+        list.appendChild(item);
+    });
+}
+
+function renderComparison(classical, deep) {
+    const grid = document.getElementById('comparisonGrid');
+    const tasks = [
+        ['car_type', 'Car Type'],
+        ['door_count', 'Doors'],
+        ['seat_count', 'Seats'],
+    ];
+    const hasDeep = deep && deep.car_type;
+    let rows = tasks.map(([key, label]) => {
+        const c = (classical[key] || {});
+        const d = (deep[key] || {});
+        const cPred = c.prediction || '-';
+        const dPred = d.prediction || '-';
+        const cConf = c.confidence !== undefined ? `${(c.confidence*100).toFixed(1)}%` : '-';
+        const dConf = d.confidence !== undefined ? `${(d.confidence*100).toFixed(1)}%` : '-';
+        const disagree = hasDeep && cPred !== '-' && dPred !== '-' && cPred !== dPred;
+        const winner = disagree && c.confidence !== undefined && d.confidence !== undefined
+            ? (d.confidence > c.confidence ? 'deep' : 'classical')
+            : null;
+        return `
+            <div class="cmp-row ${disagree ? 'cmp-disagree' : ''}">
+                <div class="cmp-label">${label}${disagree ? '<span class="cmp-flag">DISAGREE</span>' : ''}</div>
+                <div class="cmp-cell cmp-classical ${winner === 'classical' ? 'cmp-winner' : ''}">
+                    <span class="cmp-pred">${cPred}</span>
+                    <span class="cmp-conf">${cConf}</span>
+                </div>
+                <div class="cmp-cell cmp-deep ${winner === 'deep' ? 'cmp-winner' : ''}">
+                    <span class="cmp-pred">${dPred}</span>
+                    <span class="cmp-conf">${dConf}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    grid.innerHTML = `
+        <div class="cmp-table">
+            <div class="cmp-head">
+                <div class="cmp-label">TASK</div>
+                <div class="cmp-cell">Classical · RF</div>
+                <div class="cmp-cell">Deep · MobileNetV2</div>
+            </div>
+            ${rows}
+        </div>
+    `;
+}
+
+async function loadSampleAsFile(url) {
+    try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const name = url.split('/').pop() || 'sample.jpg';
+        const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+        handleFile(file);
+    } catch (err) {
+        showFeedback('error', `Could not load sample: ${err.message}`, null);
+    }
+}
+
 async function loadSamples() {
     try {
         const res = await fetch('/samples');
         const data = await res.json();
-        if (!data.samples || data.samples.length === 0) return;
-        samplesGrid.innerHTML = '';
-        data.samples.forEach(name => {
+        const grid = document.getElementById('samplesGrid');
+        grid.innerHTML = '';
+        (data.samples || []).forEach(s => {
             const tile = document.createElement('div');
             tile.className = 'sample-tile';
-            tile.innerHTML = `<img src="/static/samples/${name}" alt="${name}" loading="lazy">`;
-            tile.addEventListener('click', async () => {
-                const blob = await fetch(`/static/samples/${name}`).then(r => r.blob());
-                const file = new File([blob], name, { type: blob.type });
-                handleFile(file);
+            tile.draggable = true;
+            tile.dataset.url = s.url;
+            tile.dataset.filename = s.filename || '';
+            tile.innerHTML = `
+                <img src="${s.url}" alt="${s.label}" loading="lazy" draggable="false">
+                <span class="label">${s.label}</span>
+            `;
+            tile.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/uri-list', s.url);
+                e.dataTransfer.setData('text/plain', s.url);
+                e.dataTransfer.effectAllowed = 'copy';
+                tile.classList.add('dragging');
             });
-            samplesGrid.appendChild(tile);
+            tile.addEventListener('dragend', () => tile.classList.remove('dragging'));
+            tile.addEventListener('click', () => loadSampleAsFile(s.url));
+            grid.appendChild(tile);
         });
     } catch (e) {
-        console.warn('Samples load failed:', e);
+        console.warn('samples load failed', e);
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadSamples);
+loadSamples();

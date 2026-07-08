@@ -1,12 +1,6 @@
-"""Three model implementations: Naive baseline, Classical ML, Deep multi-task learning.
+"""Three models: Naive baseline, Classical ML (Random Forest), Deep multi-task (MobileNetV2).
 
-Unified interface:
-- fit(X, y) train
-- predict(X) predict class
-- predict_proba(X) predict probability
-- save(path) / load(path) persistence
-
-Deep model uses PyTorch + torchvision MobileNetV2 (default) or ResNet50 (optional).
+All share fit/predict/predict_proba/save/load. Deep model uses PyTorch + torchvision.
 """
 import os
 import json
@@ -116,13 +110,7 @@ class ClassicalModel:
 
 
 class DeepMultiTaskModel:
-    """MobileNetV2 (default) or ResNet50 transfer learning + multi-task classification head (PyTorch).
-
-    Shared backbone, three classification heads predict respectively:
-    - car_type (5 classes)
-    - door_count (3 classes)
-    - seat_count (3 classes)
-    """
+    """MobileNetV2/ResNet50 backbone + three linear heads (car_type/door_count/seat_count)."""
 
     def __init__(self, backbone="mobilenet", use_aux_features=False, aux_dim=50, device=None):
         self.backbone_name = backbone
