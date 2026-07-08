@@ -3,159 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarSpec AI — Vehicle Multi-Attribute Recognition</title>
+    <title>CarSpec AI - Vehicle Multi-Attribute Recognition</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <span class="logo-text">CarSpec <span class="accent">AI</span></span>
+                <span class="dot"></span>CarSpec<span class="accent">/AI</span>
+                <span class="nav-meta">v1.0 · CV M2</span>
             </div>
             <div class="nav-links">
                 <a href="#upload" class="nav-link">Recognize</a>
-                <a href="#how" class="nav-link">How It Works</a>
+                <a href="#how" class="nav-link">Pipeline</a>
                 <a href="#about" class="nav-link">About</a>
+                <a href="https://github.com/hanfuzhao/carspec-ai" class="nav-cta" target="_blank">Source ↗</a>
             </div>
         </div>
     </nav>
 
     <header class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Vehicle Multi-Attribute <span class="accent">Recognition</span></h1>
-            <p class="hero-subtitle">Upload a vehicle exterior photo, AI simultaneously recognizes car type, door count, seat count, and provides interpretable visual feature analysis</p>
-            <div class="hero-stats">
-                <div class="stat">
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Predicted Attributes</div>
+        <div class="container">
+            <div class="hero-grid">
+                <div>
+                    <div class="hero-eyebrow">Module 2 · Computer Vision Project</div>
+                    <h1 class="hero-title">
+                        Read a car<br>
+                        like a <span class="italic">spec sheet.</span><br>
+                        <span class="accent">From one photo.</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Predicts vehicle type, door count, and seat count from one photo - and shows the visual features behind each call.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-label">Attributes</div>
+                            <div class="stat-value">3<span class="unit">/image</span></div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Backbone</div>
+                            <div class="stat-value">MobileNet<span class="unit">V2</span></div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Features</div>
+                            <div class="stat-value">50<span class="unit">dims</span></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <div class="stat-value">MobileNetV2</div>
-                    <div class="stat-label">Deep Model</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">50+</div>
-                    <div class="stat-label">Interpretable Features</div>
-                </div>
+                <aside class="hero-aside">
+                    <div class="label">Dataset</div>
+                    <div class="value"><span class="arrow">▸</span>CompCars · 136,726 images</div>
+                    <div class="label">Pipeline</div>
+                    <div class="value"><span class="arrow">▸</span>Naive → Classical → Deep</div>
+                    <div class="label">Deploy</div>
+                    <div class="value"><span class="arrow">▸</span>HF Space · gunicorn · Py3.11</div>
+                    <div class="label">Status</div>
+                    <div class="value" style="color: var(--success);"><span class="arrow" style="color: var(--success);">●</span>Live · /health 200</div>
+                </aside>
             </div>
         </div>
     </header>
 
-    <section id="upload" class="upload-section">
+    <section id="upload">
         <div class="container">
-            <h2 class="section-title">Upload Vehicle Image</h2>
-            <p class="section-desc">Supports JPG/PNG, recommend uploading clear vehicle photos from side or front view</p>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-content" id="uploadContent">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                    </svg>
-                    <p class="upload-text">Drag and drop image here, or <span class="upload-link">click to select</span></p>
-                    <p class="upload-hint">JPG, PNG · Max 16MB</p>
-                </div>
-                <img id="preview" class="preview-img" style="display:none;" alt="Preview">
-                <input type="file" id="fileInput" accept="image/*" hidden>
+            <div class="section-head">
+                <span class="section-num">01 /</span>
+                <h2 class="section-title">Upload</h2>
+                <p class="section-desc">JPG or PNG. Side or front view works best. 16 MB cap.</p>
             </div>
-            <button id="predictBtn" class="btn-primary" disabled>Start Recognition</button>
+            <div class="upload-layout">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content" id="uploadContent">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <p class="upload-text">Drop image here, or <span class="upload-link">browse files</span></p>
+                        <p class="upload-hint">JPG · PNG · Max 16MB</p>
+                    </div>
+                    <img id="preview" class="preview-img" style="display:none;" alt="Preview">
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+                <aside class="samples-panel">
+                    <div class="samples-panel-head">
+                        <span class="samples-title">Sample Library</span>
+                        <span class="samples-hint">click or drag →</span>
+                    </div>
+                    <div class="samples-grid" id="samplesGrid"></div>
+                </aside>
+            </div>
+            <button id="predictBtn" class="btn-primary" disabled>Run Recognition</button>
             <div id="loading" class="loading" style="display:none;">
                 <div class="spinner"></div>
-                <p>AI is analyzing the image...</p>
-            </div>
-            <div class="samples-section">
-                <h3 class="samples-title">Or try a sample image</h3>
-                <div id="samplesGrid" class="samples-grid"></div>
+                <p>Running models...</p>
             </div>
         </div>
     </section>
 
     <section id="results" class="results-section" style="display:none;">
         <div class="container">
-            <h2 class="section-title">Recognition Results</h2>
-            <div id="feedbackBox" class="feedback-box" style="display:none;"></div>
+            <div class="section-head">
+                <span class="section-num">02 /</span>
+                <h2 class="section-title">Prediction</h2>
+                <p class="section-desc" id="predictionMeta">- · -</p>
+            </div>
+            <div id="feedbackBox" class="feedback-box feedback-info">
+                <span class="feedback-icon">i</span>
+                <span class="feedback-message">Awaiting prediction...</span>
+                <span class="feedback-conf">-</span>
+            </div>
             <div class="results-grid">
                 <div class="result-card" id="cardCarType">
-                    <div class="card-label">Car Type</div>
-                    <div class="card-value" id="resCarType">—</div>
-                    <div class="card-confidence" id="confCarType"></div>
+                    <div class="card-label"><span>Car Type</span><span class="index">A.01</span></div>
+                    <div class="card-value" id="resCarType">-</div>
+                    <div class="card-confidence" id="confCarType">-</div>
                     <div class="card-probs" id="probsCarType"></div>
                 </div>
                 <div class="result-card" id="cardDoorCount">
-                    <div class="card-label">Door Count</div>
-                    <div class="card-value" id="resDoorCount">—</div>
-                    <div class="card-confidence" id="confDoorCount"></div>
+                    <div class="card-label"><span>Door Count</span><span class="index">A.02</span></div>
+                    <div class="card-value" id="resDoorCount">-</div>
+                    <div class="card-confidence" id="confDoorCount">-</div>
                     <div class="card-probs" id="probsDoorCount"></div>
                 </div>
                 <div class="result-card" id="cardSeatCount">
-                    <div class="card-label">Seat Count</div>
-                    <div class="card-value" id="resSeatCount">—</div>
-                    <div class="card-confidence" id="confSeatCount"></div>
+                    <div class="card-label"><span>Seat Count</span><span class="index">A.03</span></div>
+                    <div class="card-value" id="resSeatCount">-</div>
+                    <div class="card-confidence" id="confSeatCount">-</div>
                     <div class="card-probs" id="probsSeatCount"></div>
                 </div>
             </div>
+
+            <div class="topk-section">
+                <div class="subsection-head">
+                    <h3 class="subsection-title">Top-5 Candidates</h3>
+                    <span class="subsection-meta">car_type · ranked</span>
+                </div>
+                <div class="topk-list" id="topkList"></div>
+            </div>
+
             <div class="explanation-section">
-                <h3 class="subsection-title">Interpretable Feature Analysis</h3>
+                <div class="subsection-head">
+                    <h3 class="subsection-title">Interpretable Feature Analysis</h3>
+                    <span class="subsection-meta">50-dim handcrafted</span>
+                </div>
                 <div class="explanation-list" id="explanationList"></div>
             </div>
+
             <div class="model-comparison">
-                <h3 class="subsection-title">Model Comparison</h3>
-                <div class="comparison-grid" id="comparisonGrid"></div>
-            </div>
-            <div class="topk-section">
-                <h3 class="subsection-title">Top-5 Predictions (Car Type)</h3>
-                <div id="topkList" class="topk-list"></div>
+                <div class="subsection-head">
+                    <h3 class="subsection-title">Model Comparison</h3>
+                    <span class="subsection-meta">3 tasks · classical vs deep</span>
+                </div>
+                <div id="comparisonGrid"></div>
             </div>
         </div>
     </section>
 
-    <section id="how" class="how-section">
+    <section id="how">
         <div class="container">
-            <h2 class="section-title">How It Works</h2>
+            <div class="section-head">
+                <span class="section-num">03 /</span>
+                <h2 class="section-title">Pipeline</h2>
+                <p class="section-desc">Four stages, pixels to labels.</p>
+            </div>
             <div class="steps-grid">
                 <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Image Upload</h3>
-                    <p>User uploads vehicle exterior photo, system preprocesses to 224×224 standard size</p>
+                    <span class="step-number">STEP_01</span>
+                    <h3>Upload</h3>
+                    <p>Photo is resized to 224×224 and normalized.</p>
                 </div>
                 <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Feature Extraction</h3>
-                    <p>Extract 50+ interpretable visual features: color histogram, HOG, texture, body proportions, symmetry</p>
+                    <span class="step-number">STEP_02</span>
+                    <h3>Extract</h3>
+                    <p>HSV histogram, HOG, LBP texture, body proportions, symmetry - 50 interpretable dims.</p>
                 </div>
                 <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Multi-Model Prediction</h3>
-                    <p>Classical ML (Random Forest) and Deep Learning (MobileNetV2 multi-task) predict in parallel</p>
+                    <span class="step-number">STEP_03</span>
+                    <h3>Predict</h3>
+                    <p>Random Forest and MobileNetV2 both run; you see both results.</p>
                 </div>
                 <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3>Interpretable Output</h3>
-                    <p>Returns prediction results, confidence, probability distribution, and visual feature explanations</p>
+                    <span class="step-number">STEP_04</span>
+                    <h3>Explain</h3>
+                    <p>You get probabilities, top-5 candidates, a confidence check, and the feature values that drove the call.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="about" class="about-section">
+    <section id="about">
         <div class="container">
-            <h2 class="section-title">About the Project</h2>
-            <p class="about-text">CarSpec AI is a computer vision-based vehicle multi-attribute recognition system, trained using the CompCars dataset (130k+ images).
-            The project implements three modeling approaches: Naive baseline, Classical ML (Random Forest + interpretable features), Deep Learning (MobileNetV2 multi-task learning),
-            and provides better performance and interpretability than single-task models through multi-task joint learning and interpretable visual features.</p>
+            <div class="section-head">
+                <span class="section-num">04 /</span>
+                <h2 class="section-title">About</h2>
+                <p class="section-desc">One model, three outputs, plus an explanation per call.</p>
+            </div>
+            <p class="about-text">
+                CarSpec AI reads a vehicle like a spec sheet. A MobileNetV2 backbone handles the deep features; 50 handcrafted features (HSV histogram, HOG, LBP, symmetry, body proportions) handle the interpretable side. One forward pass returns type, doors, seats, and a sentence explaining each.
+            </p>
             <div class="tech-stack">
                 <span class="tech-tag">MobileNetV2</span>
                 <span class="tech-tag">Random Forest</span>
-                <span class="tech-tag">Multi-Task Learning</span>
-                <span class="tech-tag">Interpretable AI</span>
-                <span class="tech-tag">Flask</span>
+                <span class="tech-tag">Multi-Task</span>
+                <span class="tech-tag">HOG · LBP · HSV</span>
+                <span class="tech-tag">Flask · gunicorn</span>
                 <span class="tech-tag">CompCars</span>
+                <span class="tech-tag">PyTorch</span>
             </div>
         </div>
     </section>
 
     <footer class="footer">
         <div class="container">
-            <p>CarSpec AI · Module 2 Project · Computer Vision</p>
+            <div class="footer-grid">
+                <span>CarSpec AI · Module 2 · CV 540 · 2026</span>
+                <a href="#" class="arrow-up">↑ TOP</a>
+            </div>
         </div>
     </footer>
 

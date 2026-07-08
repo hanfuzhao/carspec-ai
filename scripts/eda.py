@@ -24,7 +24,7 @@ def plot_class_distribution(df, task, classes, save_path):
     for bar, v in zip(bars, counts.values):
         ax.text(bar.get_x() + bar.get_width() / 2, v + max(counts.values) * 0.01,
                 str(int(v)), ha="center", va="bottom", fontsize=10)
-    ax.set_title(f"Class Distribution — {task}")
+    ax.set_title(f"Class Distribution - {task}")
     ax.set_xlabel(task)
     ax.set_ylabel("Count")
     plt.tight_layout()
@@ -33,7 +33,6 @@ def plot_class_distribution(df, task, classes, save_path):
 
 
 def plot_sample_images(df, n_per_class=3, save_path=None):
-    """Plot sample images per class grid."""
     from scripts.data import load_image, IMG_SIZE
     n_classes = len(CAR_TYPES)
     fig, axes = plt.subplots(n_per_class, n_classes, figsize=(n_classes * 2.5, n_per_class * 2.5))
@@ -57,7 +56,6 @@ def plot_sample_images(df, n_per_class=3, save_path=None):
 
 
 def compute_basic_stats(df):
-    """Compute basic dataset statistics."""
     stats = {
         "n_total": int(len(df)),
         "n_models": int(df["model_id"].nunique()) if "model_id" in df.columns else 0,
@@ -76,9 +74,8 @@ def compute_basic_stats(df):
 
 
 def run_eda():
-    """Run full EDA pipeline and save outputs."""
     print("\n" + "=" * 60)
-    print("EDA — Exploratory Data Analysis")
+    print("EDA - Exploratory Data Analysis")
     print("=" * 60)
     train, val, test = get_splits()
     full = pd.concat([train, val, test], ignore_index=True)

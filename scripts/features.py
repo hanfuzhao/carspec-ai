@@ -1,16 +1,15 @@
-"""Interpretable visual feature extraction: body proportions, contour curvature, color statistics, texture features.
+"""Interpretable visual features: aspect ratio, edge density, body proportions, color histogram, texture.
 
-These features are used for:
-1. Input for Classical ML model (HOG+color+handcrafted features + Random Forest)
-2. Auxiliary input for Deep model (concatenated after global features)
-3. Provide interpretability (which visual features influenced predictions)
+Used for:
+1. Classical model input (Random Forest)
+2. Auxiliary input for the deep model (concatenated after global features)
+3. Interpretability - which features drove a prediction
 """
 import numpy as np
 from PIL import Image
 
 
 def extract_color_histogram(img, bins=8):
-    """Extract HSV color histogram."""
     hsv = np.array(Image.fromarray((img * 255).astype(np.uint8)).convert("HSV"), dtype=np.float32)
     h_hist = np.histogram(hsv[:, :, 0], bins=bins, range=(0, 180))[0]
     s_hist = np.histogram(hsv[:, :, 1], bins=bins, range=(0, 256))[0]
@@ -22,13 +21,12 @@ def extract_color_histogram(img, bins=8):
 
 
 def extract_aspect_ratio(img):
-    """Body width-to-height ratio (vehicles are usually wider than tall)."""
+    """Body width / height."""
     h, w = img.shape[:2]
     return np.array([w / h], dtype=np.float32)
 
 
 def extract_edge_density(img):
-    """Edge density (Sobel operator)."""
     gray = np.mean(img, axis=2)
     gx = np.abs(np.gradient(gray, axis=1))
     gy = np.abs(np.gradient(gray, axis=0))
@@ -37,7 +35,7 @@ def extract_edge_density(img):
 
 
 def extract_body_proportion(img):
-    """Body proportion features: upper/lower brightness ratio, reflects body-to-window ratio."""
+    """Upper vs lower brightness."""
     h, w = img.shape[:2]
     upper = img[:h // 2].mean()
     lower = img[h // 2:].mean()
@@ -45,14 +43,13 @@ def extract_body_proportion(img):
 
 
 def extract_symmetry(img):
-    """Left-right symmetry (vehicles are usually left-right symmetric)."""
+    """Left-right symmetry score."""
     flipped = img[:, ::-1]
     diff = np.abs(img - flipped)
     return np.array([diff.mean()], dtype=np.float32)
 
 
 def extract_hog_features(img, orientations=8, pixels_per_cell=(32, 32)):
-    """Simplified HOG features."""
     try:
         from skimage.feature import hog
         gray = np.array(Image.fromarray((img * 255).astype(np.uint8)).convert("L"))
@@ -87,7 +84,7 @@ def extract_texture_features(img):
 
 
 def extract_all_features(img):
-    """Extract all interpretable features and concatenate into a vector."""
+    """Concatenate all features into one vector."""
     return np.concatenate([
         extract_color_histogram(img, bins=8),
         extract_aspect_ratio(img),
@@ -114,7 +111,7 @@ FEATURE_DIM = len(FEATURE_NAMES)
 
 
 def feature_importance_explanation(features, top_k=5):
-    """Generate interpretable explanations based on feature values."""
+    """Turn feature values into short explanation strings."""
     explanations = []
     h_hist = features[0:8]
     dominant_hue = int(np.argmax(h_hist))
