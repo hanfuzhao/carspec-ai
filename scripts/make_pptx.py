@@ -357,11 +357,11 @@ section_header(s, "08 / ENGINEERING", "Engineering")
 footer(s); page_number(s, 9, TOTAL)
 
 items = [
-    ("Code", "12 modular scripts (crawl -> clean -> train -> eval -> deploy)"),
+    ("Code", "14 modular scripts (crawl -> clean -> train -> eval -> deploy)"),
     ("Models", "6 .pkl + 1 .pt on HF Hub (auto-downloaded at runtime)"),
     ("Deployment", "HF Space · gunicorn · Python 3.11 · Dockerfile"),
     ("CI", "keep-alive cron every 6h"),
-    ("Git", "19 PRs · branch-based workflow · PR template"),
+    ("Git", "24 PRs · branch-based workflow · PR template"),
     ("Reports", "TECHNICAL_REPORT.md (15 sections) · GRADING.md · README.md"),
 ]
 y = Inches(2.2)
