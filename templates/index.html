@@ -107,6 +107,15 @@
                 <h2 class="section-title">Prediction</h2>
                 <p class="section-desc" id="predictionMeta">- · -</p>
             </div>
+            <div class="model-switcher">
+                <span class="switcher-label">Model:</span>
+                <div class="switcher-buttons" id="modelSwitcher">
+                    <button class="model-btn" data-model="naive">Naive</button>
+                    <button class="model-btn" data-model="classical">Classical</button>
+                    <button class="model-btn active" data-model="deep">Deep</button>
+                </div>
+                <span class="switcher-hint" id="switcherHint">MobileNetV2 multi-task</span>
+            </div>
             <div id="feedbackBox" class="feedback-box feedback-info">
                 <span class="feedback-icon">i</span>
                 <span class="feedback-message">Awaiting prediction...</span>
@@ -152,7 +161,7 @@
             <div class="model-comparison">
                 <div class="subsection-head">
                     <h3 class="subsection-title">Model Comparison</h3>
-                    <span class="subsection-meta">3 tasks · classical vs deep</span>
+                    <span class="subsection-meta">3 tasks · naive vs classical vs deep</span>
                 </div>
                 <div id="comparisonGrid"></div>
             </div>

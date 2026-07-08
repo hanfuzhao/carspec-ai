@@ -121,6 +121,22 @@ def predict_with_classical(features):
     return results
 
 
+def predict_with_naive():
+    results = {}
+    for task, classes in TASK_CLASSES.items():
+        key = f"naive_{task}"
+        if key in MODELS:
+            model = MODELS[key]
+            proba = model.predict_proba(np.zeros((1, 1)))[0]
+            pred_idx = int(np.argmax(proba))
+            results[task] = {
+                "prediction": classes[pred_idx],
+                "confidence": float(proba[pred_idx]),
+                "probabilities": {classes[i]: float(p) for i, p in enumerate(proba)},
+            }
+    return results
+
+
 def predict_with_deep(img_array):
     if "deep" not in MODELS:
         return None
@@ -241,6 +257,7 @@ def predict():
         features = extract_all_features(img_array)
         classical_results = predict_with_classical(features)
         deep_results = predict_with_deep(img_array)
+        naive_results = predict_with_naive()
         explanations = feature_importance_explanation(features)
         primary = deep_results if deep_results else classical_results
         primary_pred = primary.get("car_type", {}).get("prediction") if primary else None
@@ -253,6 +270,7 @@ def predict():
             "confidence": float(primary_conf),
             "top_k": top_k,
             "feedback": feedback,
+            "naive": naive_results,
             "classical": classical_results,
             "deep": deep_results,
             "explanations": explanations,

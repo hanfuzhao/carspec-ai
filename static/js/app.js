@@ -7,10 +7,29 @@ const loading = document.getElementById('loading');
 const resultsSection = document.getElementById('results');
 const feedbackBox = document.getElementById('feedbackBox');
 const predictionMeta = document.getElementById('predictionMeta');
+const modelSwitcher = document.getElementById('modelSwitcher');
+const switcherHint = document.getElementById('switcherHint');
 
 const MAX_BYTES = 16 * 1024 * 1024;
 
 let selectedFile = null;
+let currentModel = 'deep';
+let lastData = null;
+
+const MODEL_HINTS = {
+    naive: 'Majority-class baseline',
+    classical: 'Random Forest + 50 handcrafted features',
+    deep: 'MobileNetV2 multi-task',
+};
+
+modelSwitcher.addEventListener('click', (e) => {
+    const btn = e.target.closest('.model-btn');
+    if (!btn) return;
+    currentModel = btn.dataset.model;
+    document.querySelectorAll('.model-btn').forEach(b => b.classList.toggle('active', b === btn));
+    switcherHint.textContent = MODEL_HINTS[currentModel] || '';
+    if (lastData) displayResults(lastData);
+});
 
 uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', (e) => {
@@ -77,22 +96,27 @@ predictBtn.addEventListener('click', async () => {
 
 function displayResults(data) {
     resultsSection.style.display = 'block';
+    lastData = data;
+    const naive = data.naive || {};
     const classical = data.classical || {};
     const deep = data.deep || {};
-    const source = deep && deep.car_type ? deep : classical;
+    const sources = { naive, classical, deep };
+    const source = sources[currentModel] && sources[currentModel].car_type
+        ? sources[currentModel]
+        : (deep.car_type ? deep : classical);
     if (source.car_type) updateCard('CarType', source.car_type);
     if (source.door_count) updateCard('DoorCount', source.door_count);
     if (source.seat_count) updateCard('SeatCount', source.seat_count);
 
-    renderFeedback(data.confidence, data.feedback);
+    const primaryConf = source.car_type ? source.car_type.confidence : 0;
+    renderFeedback(primaryConf, data.feedback);
     renderTopK(data.top_k || []);
     renderExplanations(data.explanations || []);
-    renderComparison(classical, deep);
+    renderComparison(naive, classical, deep);
 
     const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
     const ms = data._inference_ms !== undefined ? ` · ${data._inference_ms.toFixed(0)}ms` : '';
-    const model = deep && deep.car_type ? 'deep' : 'classical';
-    predictionMeta.textContent = `${model}${ms} · ${ts}`;
+    predictionMeta.textContent = `${currentModel}${ms} · ${ts}`;
 
     resultsSection.scrollIntoView({ behavior: 'smooth' });
 }
@@ -175,7 +199,7 @@ function renderExplanations(exps) {
     });
 }
 
-function renderComparison(classical, deep) {
+function renderComparison(naive, classical, deep) {
     const grid = document.getElementById('comparisonGrid');
     const tasks = [
         ['car_type', 'Car Type'],
@@ -184,24 +208,29 @@ function renderComparison(classical, deep) {
     ];
     const hasDeep = deep && deep.car_type;
     let rows = tasks.map(([key, label]) => {
+        const n = (naive[key] || {});
         const c = (classical[key] || {});
         const d = (deep[key] || {});
+        const nPred = n.prediction || '-';
         const cPred = c.prediction || '-';
         const dPred = d.prediction || '-';
+        const nConf = n.confidence !== undefined ? `${(n.confidence*100).toFixed(1)}%` : '-';
         const cConf = c.confidence !== undefined ? `${(c.confidence*100).toFixed(1)}%` : '-';
         const dConf = d.confidence !== undefined ? `${(d.confidence*100).toFixed(1)}%` : '-';
-        const disagree = hasDeep && cPred !== '-' && dPred !== '-' && cPred !== dPred;
-        const winner = disagree && c.confidence !== undefined && d.confidence !== undefined
-            ? (d.confidence > c.confidence ? 'deep' : 'classical')
-            : null;
+        const preds = [nPred, cPred, dPred].filter(p => p !== '-');
+        const disagree = hasDeep && new Set(preds).size > 1;
         return `
             <div class="cmp-row ${disagree ? 'cmp-disagree' : ''}">
                 <div class="cmp-label">${label}${disagree ? '<span class="cmp-flag">DISAGREE</span>' : ''}</div>
-                <div class="cmp-cell cmp-classical ${winner === 'classical' ? 'cmp-winner' : ''}">
+                <div class="cmp-cell cmp-naive">
+                    <span class="cmp-pred">${nPred}</span>
+                    <span class="cmp-conf">${nConf}</span>
+                </div>
+                <div class="cmp-cell cmp-classical">
                     <span class="cmp-pred">${cPred}</span>
                     <span class="cmp-conf">${cConf}</span>
                 </div>
-                <div class="cmp-cell cmp-deep ${winner === 'deep' ? 'cmp-winner' : ''}">
+                <div class="cmp-cell cmp-deep">
                     <span class="cmp-pred">${dPred}</span>
                     <span class="cmp-conf">${dConf}</span>
                 </div>
@@ -212,6 +241,7 @@ function renderComparison(classical, deep) {
         <div class="cmp-table">
             <div class="cmp-head">
                 <div class="cmp-label">TASK</div>
+                <div class="cmp-cell">Naive</div>
                 <div class="cmp-cell">Classical · RF</div>
                 <div class="cmp-cell">Deep · MobileNetV2</div>
             </div>
